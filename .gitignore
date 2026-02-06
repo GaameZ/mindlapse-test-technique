@@ -9,3 +9,4 @@ build/
 tmp/
 coverage/
 .vite/
+.github/copilot-instructions.md
