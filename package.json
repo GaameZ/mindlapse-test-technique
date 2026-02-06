@@ -1,0 +1,21 @@
+{
+  "name": "mindlapse-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Cyber Risk Intelligence Platform – Monorepo pnpm workspace",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.7.0"
+  }
+}
