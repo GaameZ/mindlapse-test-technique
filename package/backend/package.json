@@ -30,7 +30,8 @@
     "#database/*": "./database/*.js",
     "#start/*": "./start/*.js",
     "#tests/*": "./tests/*.js",
-    "#config/*": "./config/*.js"
+    "#config/*": "./config/*.js",
+    "#types/*": "./types/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.8.2",
@@ -42,6 +43,9 @@
     "@japa/plugin-adonisjs": "^4.0.0",
     "@japa/runner": "^4.2.0",
     "@swc/core": "1.11.24",
+    "@types/bcrypt": "^6.0.0",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/luxon": "^3.7.1",
     "@types/node": "^22.15.18",
     "@types/pg": "^8.16.0",
@@ -57,7 +61,10 @@
     "@adonisjs/auth": "^9.4.0",
     "@adonisjs/core": "^6.18.0",
     "@adonisjs/cors": "^2.2.1",
+    "@mindlapse/shared": "workspace:*",
     "@vinejs/vine": "^3.0.1",
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.3",
     "kysely": "^0.27.6",
     "luxon": "^3.7.2",
     "pg": "^8.18.0",

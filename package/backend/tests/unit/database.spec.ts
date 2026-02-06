@@ -1,6 +1,6 @@
 import { test } from '@japa/runner'
 import { sql } from 'kysely'
-import { Role, SupplierCategory, RiskLevel, SupplierStatus, AuditAction } from '../../database/types.js'
+import { Role, SupplierCategory, RiskLevel, SupplierStatus, AuditAction } from '@mindlapse/shared'
 import db from '../../config/database.js'
 
 test.group('Organizations', (group) => {
@@ -94,7 +94,7 @@ test.group('Users', (group) => {
         email: 'alice@acme.com',
         password_hash: '$2b$10$fakehashfortest',
         full_name: 'Alice Martin',
-        role: Role.analyst,
+        role: Role.ANALYST,
         organization_id: orgId,
       })
       .returningAll()
@@ -102,7 +102,7 @@ test.group('Users', (group) => {
 
     assert.isString(user.id)
     assert.equal(user.email, 'alice@acme.com')
-    assert.equal(user.role, Role.analyst)
+    assert.equal(user.role, Role.ANALYST)
     assert.equal(user.organization_id, orgId)
     assert.instanceOf(user.created_at, Date)
   })
@@ -114,7 +114,7 @@ test.group('Users', (group) => {
         email: 'duplicate@acme.com',
         password_hash: '$2b$10$fakehash1',
         full_name: 'User One',
-        role: Role.admin,
+        role: Role.ADMIN,
         organization_id: orgId,
       })
       .execute()
@@ -126,7 +126,7 @@ test.group('Users', (group) => {
           email: 'duplicate@acme.com',
           password_hash: '$2b$10$fakehash2',
           full_name: 'User Two',
-          role: Role.analyst,
+          role: Role.ANALYST,
           organization_id: orgId,
         })
         .execute()
@@ -144,14 +144,14 @@ test.group('Users', (group) => {
           email: 'user1@acme.com',
           password_hash: '$2b$10$hash1',
           full_name: 'User 1',
-          role: Role.analyst,
+          role: Role.ANALYST,
           organization_id: orgId,
         },
         {
           email: 'user2@acme.com',
           password_hash: '$2b$10$hash2',
           full_name: 'User 2',
-          role: Role.auditor,
+          role: Role.AUDITOR,
           organization_id: orgId,
         },
       ])
@@ -173,7 +173,7 @@ test.group('Users', (group) => {
         email: 'cascade@acme.com',
         password_hash: '$2b$10$cascadehash',
         full_name: 'Cascade User',
-        role: Role.owner,
+        role: Role.OWNER,
         organization_id: orgId,
       })
       .execute()
@@ -216,9 +216,9 @@ test.group('Suppliers', (group) => {
       .values({
         name: 'CloudGuard',
         domain: 'cloudguard.io',
-        category: SupplierCategory.SaaS,
-        risk_level: RiskLevel.medium,
-        status: SupplierStatus.active,
+        category: SupplierCategory.SAAS,
+        risk_level: RiskLevel.MEDIUM,
+        status: SupplierStatus.ACTIVE,
         organization_id: orgId,
       })
       .returningAll()
@@ -227,9 +227,9 @@ test.group('Suppliers', (group) => {
     assert.isString(supplier.id)
     assert.equal(supplier.name, 'CloudGuard')
     assert.equal(supplier.domain, 'cloudguard.io')
-    assert.equal(supplier.category, SupplierCategory.SaaS)
-    assert.equal(supplier.risk_level, RiskLevel.medium)
-    assert.equal(supplier.status, SupplierStatus.active)
+    assert.equal(supplier.category, SupplierCategory.SAAS)
+    assert.equal(supplier.risk_level, RiskLevel.MEDIUM)
+    assert.equal(supplier.status, SupplierStatus.ACTIVE)
     assert.isNull(supplier.ai_risk_score)
     assert.isNull(supplier.ai_analysis)
   })
@@ -240,9 +240,9 @@ test.group('Suppliers', (group) => {
       .values({
         name: 'InfraNet',
         domain: 'infranet.com',
-        category: SupplierCategory.Infrastructure,
-        risk_level: RiskLevel.low,
-        status: SupplierStatus.active,
+        category: SupplierCategory.INFRASTRUCTURE,
+        risk_level: RiskLevel.LOW,
+        status: SupplierStatus.ACTIVE,
         organization_id: orgId,
       })
       .returningAll()
@@ -250,7 +250,7 @@ test.group('Suppliers', (group) => {
 
     await db
       .updateTable('suppliers')
-      .set({ risk_level: RiskLevel.critical })
+      .set({ risk_level: RiskLevel.CRITICAL })
       .where('id', '=', supplier.id)
       .execute()
 
@@ -260,7 +260,7 @@ test.group('Suppliers', (group) => {
       .where('id', '=', supplier.id)
       .executeTakeFirstOrThrow()
 
-    assert.equal(updated.risk_level, RiskLevel.critical)
+    assert.equal(updated.risk_level, RiskLevel.CRITICAL)
   })
 
   test('should store AI analysis as JSON', async ({ assert }) => {
@@ -275,9 +275,9 @@ test.group('Suppliers', (group) => {
       .values({
         name: 'AI Tested',
         domain: 'aitested.io',
-        category: SupplierCategory.Consulting,
-        risk_level: RiskLevel.high,
-        status: SupplierStatus.under_review,
+        category: SupplierCategory.CONSULTING,
+        risk_level: RiskLevel.HIGH,
+        status: SupplierStatus.UNDER_REVIEW,
         organization_id: orgId,
         ai_risk_score: 72.5,
         ai_analysis: JSON.stringify(aiAnalysis),
@@ -298,17 +298,17 @@ test.group('Suppliers', (group) => {
         {
           name: 'Low Risk',
           domain: 'lowrisk.com',
-          category: SupplierCategory.Other,
-          risk_level: RiskLevel.low,
-          status: SupplierStatus.active,
+          category: SupplierCategory.OTHER,
+          risk_level: RiskLevel.LOW,
+          status: SupplierStatus.ACTIVE,
           organization_id: orgId,
         },
         {
           name: 'Critical Risk',
           domain: 'criticalrisk.com',
-          category: SupplierCategory.SaaS,
-          risk_level: RiskLevel.critical,
-          status: SupplierStatus.active,
+          category: SupplierCategory.SAAS,
+          risk_level: RiskLevel.CRITICAL,
+          status: SupplierStatus.ACTIVE,
           organization_id: orgId,
         },
       ])
@@ -318,7 +318,7 @@ test.group('Suppliers', (group) => {
       .selectFrom('suppliers')
       .selectAll()
       .where('organization_id', '=', orgId)
-      .where('risk_level', '=', RiskLevel.critical)
+      .where('risk_level', '=', RiskLevel.CRITICAL)
       .execute()
 
     assert.lengthOf(critical, 1)
@@ -331,9 +331,9 @@ test.group('Suppliers', (group) => {
       .values({
         name: 'Cascade Supplier',
         domain: 'cascade.com',
-        category: SupplierCategory.SaaS,
-        risk_level: RiskLevel.low,
-        status: SupplierStatus.active,
+        category: SupplierCategory.SAAS,
+        risk_level: RiskLevel.LOW,
+        status: SupplierStatus.ACTIVE,
         organization_id: orgId,
       })
       .execute()
@@ -369,7 +369,7 @@ test.group('Audit Logs', (group) => {
         email: 'auditor@acme.com',
         password_hash: '$2b$10$audithash',
         full_name: 'Audit User',
-        role: Role.admin,
+        role: Role.ADMIN,
         organization_id: orgId,
       })
       .returningAll()
@@ -381,9 +381,9 @@ test.group('Audit Logs', (group) => {
       .values({
         name: 'Audited Supplier',
         domain: 'audited.io',
-        category: SupplierCategory.SaaS,
-        risk_level: RiskLevel.medium,
-        status: SupplierStatus.active,
+        category: SupplierCategory.SAAS,
+        risk_level: RiskLevel.MEDIUM,
+        status: SupplierStatus.ACTIVE,
         organization_id: orgId,
       })
       .returningAll()
@@ -540,17 +540,17 @@ test.group('Multi-tenant isolation', (group) => {
         {
           name: 'Supplier Org A',
           domain: 'orga.com',
-          category: SupplierCategory.SaaS,
-          risk_level: RiskLevel.low,
-          status: SupplierStatus.active,
+          category: SupplierCategory.SAAS,
+          risk_level: RiskLevel.LOW,
+          status: SupplierStatus.ACTIVE,
           organization_id: orgAId,
         },
         {
           name: 'Supplier Org B',
           domain: 'orgb.com',
-          category: SupplierCategory.Infrastructure,
-          risk_level: RiskLevel.high,
-          status: SupplierStatus.active,
+          category: SupplierCategory.INFRASTRUCTURE,
+          risk_level: RiskLevel.HIGH,
+          status: SupplierStatus.ACTIVE,
           organization_id: orgBId,
         },
       ])

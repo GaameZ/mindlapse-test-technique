@@ -1,37 +1,5 @@
 import { ColumnType, Generated, Insertable, Selectable, Updateable } from 'kysely'
-
-export enum Role {
-  owner = 'owner',
-  admin = 'admin',
-  analyst = 'analyst',
-  auditor = 'auditor',
-}
-
-export enum SupplierCategory {
-  SaaS = 'SaaS',
-  Infrastructure = 'Infrastructure',
-  Consulting = 'Consulting',
-  Other = 'Other',
-}
-
-export enum RiskLevel {
-  critical = 'critical',
-  high = 'high',
-  medium = 'medium',
-  low = 'low',
-}
-
-export enum SupplierStatus {
-  active = 'active',
-  under_review = 'under_review',
-  inactive = 'inactive',
-}
-
-export enum AuditAction {
-  CREATE = 'CREATE',
-  UPDATE = 'UPDATE',
-  DELETE = 'DELETE',
-}
+import { Role, SupplierCategory, RiskLevel, SupplierStatus, AuditAction } from '@mindlapse/shared'
 
 type CreatedAt = ColumnType<Date, string | undefined, never>
 
