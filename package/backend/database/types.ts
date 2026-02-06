@@ -1,4 +1,4 @@
-import { ColumnType, Generated, Insertable, JSONColumnType, Selectable, Updateable } from 'kysely'
+import { ColumnType, Generated, Insertable, Selectable, Updateable } from 'kysely'
 
 export enum Role {
   owner = 'owner',
@@ -73,11 +73,11 @@ export interface SupplierTable {
   category: SupplierCategory
   risk_level: RiskLevel
   status: SupplierStatus
-  contract_end_date: Date | null
-  notes: string | null
+  contract_end_date: ColumnType<Date | null, string | null | undefined, string | null | undefined>
+  notes: ColumnType<string | null, string | null | undefined, string | null | undefined>
   organization_id: string
-  ai_risk_score: number | null
-  ai_analysis: JSONColumnType<Record<string, unknown> | null>
+  ai_risk_score: ColumnType<number | null, number | null | undefined, number | null | undefined>
+  ai_analysis: ColumnType<Record<string, unknown> | null, string | null | undefined, string | null | undefined>
   created_at: CreatedAt
 }
 
@@ -91,8 +91,8 @@ export interface AuditLogTable {
   action: AuditAction
   entity_type: string
   entity_id: string
-  before: JSONColumnType<Record<string, unknown> | null>
-  after: JSONColumnType<Record<string, unknown> | null>
+  before: ColumnType<Record<string, unknown> | null, string | null | undefined, string | null | undefined>
+  after: ColumnType<Record<string, unknown> | null, string | null | undefined, string | null | undefined>
   ip_address: string
   created_at: CreatedAt
 }

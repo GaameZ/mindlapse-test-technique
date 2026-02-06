@@ -5,7 +5,7 @@ import {
   Migrator,
   FileMigrationProvider,
 } from 'kysely'
-import { db } from './database.js'
+import db from '../config/database.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 

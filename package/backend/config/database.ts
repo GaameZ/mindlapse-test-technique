@@ -1,6 +1,7 @@
 import env from '#start/env'
 import { Pool } from 'pg'
 import { Kysely, PostgresDialect } from 'kysely'
+import { Database } from '#database/types'
 
 const dialect = new PostgresDialect({
   pool: new Pool({
@@ -13,7 +14,7 @@ const dialect = new PostgresDialect({
   }),
 })
 
-const db = new Kysely({
+const db = new Kysely<Database>({
   dialect,
 })
 
