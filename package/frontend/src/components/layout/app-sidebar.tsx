@@ -16,12 +16,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { Link } from '@tanstack/react-router'
-
-const user = {
-  name: 'shadcn',
-  email: 'm@example.com',
-  avatar: '/avatars/shadcn.jpg',
-}
+import { useAuth } from '@/contexts/AuthContext'
 
 const navMainItems: INavItem[] = [
   {
@@ -45,6 +40,12 @@ const navSecondaryItems: INavItem[] = [
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user: authUser } = useAuth()
+  const user = {
+    name: authUser?.fullName || '',
+    email: authUser?.email || '',
+  }
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -56,8 +57,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-medium">Mindlapse</span>
+                  <span className="truncate text-xs">Test technique</span>
                 </div>
               </Link>
             </SidebarMenuButton>
