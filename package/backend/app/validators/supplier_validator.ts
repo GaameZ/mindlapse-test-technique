@@ -1,5 +1,7 @@
 import vine from '@vinejs/vine'
 
+const NOTES_REGEX = /^[a-zA-Z0-9\s\.,;:!?\-()'"]*$/
+
 export const createSupplierValidator = vine.compile(
   vine.object({
     name: vine.string().trim().minLength(1).maxLength(255),
@@ -8,7 +10,12 @@ export const createSupplierValidator = vine.compile(
     riskLevel: vine.enum(['critical', 'high', 'medium', 'low']),
     status: vine.enum(['active', 'under_review', 'inactive']),
     contractEndDate: vine.string().optional(),
-    notes: vine.string().trim().maxLength(10000).optional(),
+    notes: vine
+      .string()
+      .trim()
+      .maxLength(10000)
+      .regex(NOTES_REGEX)
+      .optional(),
   })
 )
 
@@ -20,7 +27,13 @@ export const updateSupplierValidator = vine.compile(
     riskLevel: vine.enum(['critical', 'high', 'medium', 'low']).optional(),
     status: vine.enum(['active', 'under_review', 'inactive']).optional(),
     contractEndDate: vine.string().optional().nullable(),
-    notes: vine.string().trim().maxLength(10000).optional().nullable(),
+    notes: vine
+      .string()
+      .trim()
+      .maxLength(10000)
+      .regex(NOTES_REGEX)
+      .optional()
+      .nullable(),
   })
 )
 

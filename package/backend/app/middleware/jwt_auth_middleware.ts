@@ -14,7 +14,7 @@ export default class JwtAuthMiddleware {
       })
     }
 
-    const token = authHeader.substring(7)
+    const token = authHeader.replace('Bearer ', '')
 
     try {
       const payload = AuthService.verifyAccessToken(token)

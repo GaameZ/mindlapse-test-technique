@@ -28,6 +28,9 @@ importers:
       '@adonisjs/cors':
         specifier: ^2.2.1
         version: 2.2.1(@adonisjs/core@6.20.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(bcrypt@6.0.0))
+      '@adonisjs/limiter':
+        specifier: ^2.4.0
+        version: 2.4.0(@adonisjs/core@6.20.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(bcrypt@6.0.0))
       '@mindlapse/shared':
         specifier: workspace:*
         version: link:../shared
@@ -37,6 +40,9 @@ importers:
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
+      helmet:
+        specifier: ^8.1.0
+        version: 8.1.0
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
@@ -312,6 +318,18 @@ packages:
       '@adonisjs/events': ^9.0.0
       '@adonisjs/fold': ^10.0.1
       '@adonisjs/logger': ^6.0.1
+
+  '@adonisjs/limiter@2.4.0':
+    resolution: {integrity: sha512-W3uhoQ9/dEDs6WQzyBhY0PFedwwkFQbVBaCjMffqJ4TJKsQqAUZdyKCwhvn6lEdqoSmlhTr/HOUh8M4+u7pJGQ==}
+    peerDependencies:
+      '@adonisjs/core': ^6.12.1
+      '@adonisjs/lucid': ^20.1.0 || ^21.0.0
+      '@adonisjs/redis': ^8.0.1 || ^9.0.0
+    peerDependenciesMeta:
+      '@adonisjs/lucid':
+        optional: true
+      '@adonisjs/redis':
+        optional: true
 
   '@adonisjs/logger@6.0.7':
     resolution: {integrity: sha512-zeWk14EuFGD+YrwLfwrzUcEKS06equr1Xn624+b28H3s0JhjmgXNfsDRlBe9X+GgJiuD8Zf3/52MX//7cGaNWQ==}
@@ -2152,6 +2170,10 @@ packages:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
 
+  helmet@8.1.0:
+    resolution: {integrity: sha512-jOiHyAZsmnr8LqoPGmCjYAaiuWwjAPLgY8ZX2XrmHawt99/u1y6RgrZMTeoPfpUbV96HOalYgz1qzkRbw54Pmg==}
+    engines: {node: '>=18.0.0'}
+
   help-me@5.0.0:
     resolution: {integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==}
 
@@ -2863,6 +2885,9 @@ packages:
   range-parser@1.2.1:
     resolution: {integrity: sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==}
     engines: {node: '>= 0.6'}
+
+  rate-limiter-flexible@7.4.0:
+    resolution: {integrity: sha512-IJopePGO6HnMWVdeLCihnxXZ0WCW0mxXiU5LE3bZ00GHESsCaAvgD8hN/ATIJeZhnrVdU5cfRyS1uV63Vmc4zg==}
 
   raw-body@2.5.3:
     resolution: {integrity: sha512-s4VSOf6yN0rvbRZGxs8Om5CWj6seneMwK3oDb4lWDH0UPhWcxwOWw5+qk24bxq87szX1ydrwylIOp2uG1ojUpA==}
@@ -3650,6 +3675,11 @@ snapshots:
       type-is: 2.0.1
       vary: 1.1.2
       youch: 3.3.4
+
+  '@adonisjs/limiter@2.4.0(@adonisjs/core@6.20.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(bcrypt@6.0.0))':
+    dependencies:
+      '@adonisjs/core': 6.20.0(@adonisjs/assembler@7.8.2(typescript@5.8.3))(@vinejs/vine@3.0.1)(bcrypt@6.0.0)
+      rate-limiter-flexible: 7.4.0
 
   '@adonisjs/logger@6.0.7':
     dependencies:
@@ -5525,6 +5555,8 @@ snapshots:
 
   he@1.2.0: {}
 
+  helmet@8.1.0: {}
+
   help-me@5.0.0: {}
 
   hosted-git-info@7.0.2:
@@ -6134,6 +6166,8 @@ snapshots:
   random-bytes@1.0.0: {}
 
   range-parser@1.2.1: {}
+
+  rate-limiter-flexible@7.4.0: {}
 
   raw-body@2.5.3:
     dependencies:

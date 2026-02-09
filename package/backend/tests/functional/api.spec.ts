@@ -79,18 +79,12 @@ test.group('Auth API', (group) => {
       })
 
     response.assertStatus(201)
-    response.assertBodyContains({
-      data: {
-        user: {
-          email: 'owner@testauth.com',
-          role: 'owner',
-        },
-      },
-    })
-
+    
     const body = response.body()
     assert.isDefined(body.data.tokens.accessToken)
     assert.isDefined(body.data.tokens.refreshToken)
+    // Sécurité : Le register ne retourne que les tokens, pas les données utilisateur
+    assert.isUndefined(body.data.user)
   })
 
   test('POST /api/v1/auth/register — rejects duplicate email', async ({ client }) => {
@@ -106,7 +100,7 @@ test.group('Auth API', (group) => {
     response.assertStatus(409)
   })
 
-  test('POST /api/v1/auth/login — valid credentials', async ({ client }) => {
+  test('POST /api/v1/auth/login — valid credentials', async ({ client, assert }) => {
     const response = await client
       .post('/api/v1/auth/login')
       .json({
@@ -115,9 +109,12 @@ test.group('Auth API', (group) => {
       })
 
     response.assertStatus(200)
-    response.assertBodyContains({
-      data: { user: { email: 'owner@testauth.com' } },
-    })
+    
+    const body = response.body()
+    assert.isDefined(body.data.tokens.accessToken)
+    assert.isDefined(body.data.tokens.refreshToken)
+    // Sécurité : Le login ne retourne que les tokens, pas les données utilisateur
+    assert.isUndefined(body.data.user)
   })
 
   test('POST /api/v1/auth/login — invalid password', async ({ client }) => {

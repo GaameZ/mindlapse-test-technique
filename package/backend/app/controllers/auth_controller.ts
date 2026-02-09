@@ -66,13 +66,6 @@ export default class AuthController {
 
     ctx.response.created({
       data: {
-        user: {
-          id: result.user.id,
-          email: result.user.email,
-          fullName: result.user.full_name,
-          role: result.user.role,
-          organizationId: result.user.organization_id,
-        },
         tokens: result.tokens,
       },
     })
@@ -89,13 +82,6 @@ export default class AuthController {
 
       ctx.response.ok({
         data: {
-          user: {
-            id: result.user.id,
-            email: result.user.email,
-            fullName: result.user.full_name,
-            role: result.user.role,
-            organizationId: result.user.organization_id,
-          },
           tokens: result.tokens,
         },
       })
@@ -103,7 +89,7 @@ export default class AuthController {
       if (error instanceof Error && error.message === 'INVALID_CREDENTIALS') {
         ctx.response.unauthorized({
           error: 'UNAUTHORIZED',
-          message: 'Invalid email or password',
+          message: 'Invalid credentials',
         })
         return
       }
