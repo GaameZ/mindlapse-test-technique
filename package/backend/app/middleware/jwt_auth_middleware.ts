@@ -30,7 +30,6 @@ export default class JwtAuthMiddleware {
   }
 }
 
-
 export function getAuthUser(ctx: HttpContext): JwtPayload {
   if (!ctx.auth) {
     throw new Error('Authentication required: ctx.auth is not set')

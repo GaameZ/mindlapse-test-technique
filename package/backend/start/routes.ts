@@ -67,4 +67,3 @@ router
       .use(middleware.rbac({ permission: 'user:manage' }))
   })
   .prefix('/api/v1')
-

@@ -1,13 +1,7 @@
 import { test } from '@japa/runner'
 import db from '#config/database'
 import AuthService from '#services/auth_service'
-import { 
-  Role, 
-  SupplierCategory, 
-  RiskLevel, 
-  SupplierStatus,
-  type AuditLog
-} from '@mindlapse/shared'
+import { Role, SupplierCategory, RiskLevel, SupplierStatus, type AuditLog } from '@mindlapse/shared'
 
 /*
 |--------------------------------------------------------------------------
@@ -69,17 +63,15 @@ test.group('Auth API', (group) => {
   })
 
   test('POST /api/v1/auth/register — creates org + user', async ({ client, assert }) => {
-    const response = await client
-      .post('/api/v1/auth/register')
-      .json({
-        email: 'owner@testauth.com',
-        password: 'Password123!',
-        fullName: 'Auth Owner',
-        organizationName: 'Auth Test Org',
-      })
+    const response = await client.post('/api/v1/auth/register').json({
+      email: 'owner@testauth.com',
+      password: 'Password123!',
+      fullName: 'Auth Owner',
+      organizationName: 'Auth Test Org',
+    })
 
     response.assertStatus(201)
-    
+
     const body = response.body()
     assert.isDefined(body.data.tokens.accessToken)
     assert.isDefined(body.data.tokens.refreshToken)
@@ -88,28 +80,24 @@ test.group('Auth API', (group) => {
   })
 
   test('POST /api/v1/auth/register — rejects duplicate email', async ({ client }) => {
-    const response = await client
-      .post('/api/v1/auth/register')
-      .json({
-        email: 'owner@testauth.com',
-        password: 'Password123!',
-        fullName: 'Auth Owner 2',
-        organizationName: 'Auth Test Org 2',
-      })
+    const response = await client.post('/api/v1/auth/register').json({
+      email: 'owner@testauth.com',
+      password: 'Password123!',
+      fullName: 'Auth Owner 2',
+      organizationName: 'Auth Test Org 2',
+    })
 
     response.assertStatus(409)
   })
 
   test('POST /api/v1/auth/login — valid credentials', async ({ client, assert }) => {
-    const response = await client
-      .post('/api/v1/auth/login')
-      .json({
-        email: 'owner@testauth.com',
-        password: 'Password123!',
-      })
+    const response = await client.post('/api/v1/auth/login').json({
+      email: 'owner@testauth.com',
+      password: 'Password123!',
+    })
 
     response.assertStatus(200)
-    
+
     const body = response.body()
     assert.isDefined(body.data.tokens.accessToken)
     assert.isDefined(body.data.tokens.refreshToken)
@@ -118,12 +106,10 @@ test.group('Auth API', (group) => {
   })
 
   test('POST /api/v1/auth/login — invalid password', async ({ client }) => {
-    const response = await client
-      .post('/api/v1/auth/login')
-      .json({
-        email: 'owner@testauth.com',
-        password: 'WrongPassword!',
-      })
+    const response = await client.post('/api/v1/auth/login').json({
+      email: 'owner@testauth.com',
+      password: 'WrongPassword!',
+    })
 
     response.assertStatus(401)
   })
@@ -135,9 +121,7 @@ test.group('Auth API', (group) => {
 
     const refreshToken = loginRes.body().data.tokens.refreshToken
 
-    const response = await client
-      .post('/api/v1/auth/refresh')
-      .json({ refreshToken })
+    const response = await client.post('/api/v1/auth/refresh').json({ refreshToken })
 
     response.assertStatus(200)
     const body = response.body()
@@ -152,9 +136,7 @@ test.group('Auth API', (group) => {
 
     const token = loginRes.body().data.tokens.accessToken
 
-    const response = await client
-      .get('/api/v1/auth/me')
-      .header('Authorization', `Bearer ${token}`)
+    const response = await client.get('/api/v1/auth/me').header('Authorization', `Bearer ${token}`)
 
     response.assertStatus(200)
     response.assertBodyContains({
@@ -356,7 +338,10 @@ test.group('Audit Logs API', (group) => {
     await cleanupAll()
   })
 
-  test('GET /api/v1/suppliers/:supplierId/audit-logs — returns audit logs for a specific supplier', async ({ client, assert }) => {
+  test('GET /api/v1/suppliers/:supplierId/audit-logs — returns audit logs for a specific supplier', async ({
+    client,
+    assert,
+  }) => {
     const createRes = await client
       .post('/api/v1/suppliers')
       .header('Authorization', `Bearer ${ownerToken}`)
@@ -382,11 +367,11 @@ test.group('Audit Logs API', (group) => {
 
     response.assertStatus(200)
     const body = response.body()
-    
+
     assert.isAtLeast(body.data.length, 2)
     assert.isTrue(body.data.every((log: AuditLog) => log.entityId === supplierId))
     assert.isTrue(body.data.every((log: AuditLog) => log.entityType === 'supplier'))
-    
+
     const actions = body.data.map((log: AuditLog) => log.action)
     assert.include(actions, 'CREATE')
     assert.include(actions, 'UPDATE')
@@ -582,25 +567,21 @@ test.group('Input Validation', (group) => {
   })
 
   test('Register rejects invalid email', async ({ client }) => {
-    const response = await client
-      .post('/api/v1/auth/register')
-      .json({
-        email: 'not-an-email',
-        password: 'Password123!',
-        fullName: 'Bad Email',
-      })
+    const response = await client.post('/api/v1/auth/register').json({
+      email: 'not-an-email',
+      password: 'Password123!',
+      fullName: 'Bad Email',
+    })
 
     response.assertStatus(422)
   })
 
   test('Register rejects short password', async ({ client }) => {
-    const response = await client
-      .post('/api/v1/auth/register')
-      .json({
-        email: 'shortpw@test.com',
-        password: 'short',
-        fullName: 'Short PW',
-      })
+    const response = await client.post('/api/v1/auth/register').json({
+      email: 'shortpw@test.com',
+      password: 'short',
+      fullName: 'Short PW',
+    })
 
     response.assertStatus(422)
   })

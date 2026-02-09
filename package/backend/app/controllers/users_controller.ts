@@ -25,9 +25,7 @@ export default class UsersController {
     const sortOrder = query.sortOrder ?? 'desc'
     const offset = (page - 1) * limit
 
-    let baseQuery = db
-      .selectFrom('users')
-      .where('organization_id', '=', user.organizationId)
+    let baseQuery = db.selectFrom('users').where('organization_id', '=', user.organizationId)
 
     if (query.role) {
       baseQuery = baseQuery.where('role', '=', query.role as Role)

@@ -25,6 +25,7 @@ All endpoints return JSON. Protected endpoints require an `Authorization: Bearer
 Create a new user account and organization.
 
 **Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -39,6 +40,7 @@ Create a new user account and organization.
 - If `organizationName` is provided (or defaults), a new organization is created and the user becomes `Owner`.
 
 **Response (201):**
+
 ```json
 {
   "data": {
@@ -64,6 +66,7 @@ Create a new user account and organization.
 Authenticate with email and password.
 
 **Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -72,10 +75,17 @@ Authenticate with email and password.
 ```
 
 **Response (200):**
+
 ```json
 {
   "data": {
-    "user": { "id": "uuid", "email": "...", "fullName": "...", "role": "...", "organizationId": "..." },
+    "user": {
+      "id": "uuid",
+      "email": "...",
+      "fullName": "...",
+      "role": "...",
+      "organizationId": "..."
+    },
     "tokens": { "accessToken": "jwt...", "refreshToken": "jwt..." }
   }
 }
@@ -90,6 +100,7 @@ Authenticate with email and password.
 Refresh expired access token.
 
 **Body:**
+
 ```json
 {
   "refreshToken": "jwt..."
@@ -97,6 +108,7 @@ Refresh expired access token.
 ```
 
 **Response (200):**
+
 ```json
 {
   "data": {
@@ -114,10 +126,17 @@ Refresh expired access token.
 Get the currently authenticated user's profile.
 
 **Response (200):**
+
 ```json
 {
   "data": {
-    "user": { "id": "uuid", "email": "...", "fullName": "...", "role": "...", "organizationId": "..." }
+    "user": {
+      "id": "uuid",
+      "email": "...",
+      "fullName": "...",
+      "role": "...",
+      "organizationId": "..."
+    }
   }
 }
 ```
@@ -145,6 +164,7 @@ List suppliers with pagination, search, and filtering.
 | `status` | string | — | Filter: `active`, `under_review`, `inactive` |
 
 **Response (200):**
+
 ```json
 {
   "data": [
@@ -174,9 +194,10 @@ List suppliers with pagination, search, and filtering.
 Get a single supplier by ID.
 
 **Response (200):**
+
 ```json
 {
-  "data": { "id": "uuid", "name": "...", "..." : "..." }
+  "data": { "id": "uuid", "name": "...", "...": "..." }
 }
 ```
 
@@ -189,6 +210,7 @@ Get a single supplier by ID.
 Create a new supplier.
 
 **Body:**
+
 ```json
 {
   "name": "Acme Security",
@@ -201,15 +223,15 @@ Create a new supplier.
 }
 ```
 
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| `name` | string | ✅ | 1–255 chars |
-| `domain` | string | ✅ | 1–255 chars |
-| `category` | enum | ✅ | `SaaS`, `Infrastructure`, `Consulting`, `Other` |
-| `riskLevel` | enum | ✅ | `critical`, `high`, `medium`, `low` |
-| `status` | enum | ✅ | `active`, `under_review`, `inactive` |
-| `contractEndDate` | string | ❌ | ISO date |
-| `notes` | string | ❌ | max 10000 chars |
+| Field             | Type   | Required | Validation                                      |
+| ----------------- | ------ | -------- | ----------------------------------------------- |
+| `name`            | string | ✅       | 1–255 chars                                     |
+| `domain`          | string | ✅       | 1–255 chars                                     |
+| `category`        | enum   | ✅       | `SaaS`, `Infrastructure`, `Consulting`, `Other` |
+| `riskLevel`       | enum   | ✅       | `critical`, `high`, `medium`, `low`             |
+| `status`          | enum   | ✅       | `active`, `under_review`, `inactive`            |
+| `contractEndDate` | string | ❌       | ISO date                                        |
+| `notes`           | string | ❌       | max 10000 chars                                 |
 
 **Response (201):** The created supplier object.
 
@@ -234,6 +256,7 @@ Update an existing supplier. All fields are optional.
 Delete a supplier.
 
 **Response (200):**
+
 ```json
 { "message": "Supplier deleted successfully" }
 ```
@@ -263,6 +286,7 @@ List audit logs with pagination and filtering.
 | `userId` | uuid | — | Filter by user ID |
 
 **Response (200):**
+
 ```json
 {
   "data": [
@@ -275,7 +299,7 @@ List audit logs with pagination and filtering.
       "entityType": "supplier",
       "entityId": "uuid",
       "before": null,
-      "after": { "name": "Acme", "..." : "..." },
+      "after": { "name": "Acme", "...": "..." },
       "ipAddress": "::1",
       "createdAt": "2026-02-06T12:00:00.000Z"
     }
@@ -310,6 +334,7 @@ List users in the organization.
 | `role` | string | — | Filter: `owner`, `admin`, `analyst`, `auditor` |
 
 **Response (200):**
+
 ```json
 {
   "data": [
@@ -339,6 +364,7 @@ Get a single user by ID.
 Create a new user in the organization.
 
 **Body:**
+
 ```json
 {
   "email": "newuser@example.com",
@@ -348,12 +374,12 @@ Create a new user in the organization.
 }
 ```
 
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| `email` | string | ✅ | Valid email |
-| `password` | string | ✅ | 8–128 chars |
-| `fullName` | string | ✅ | 1–255 chars |
-| `role` | enum | ✅ | `owner`, `admin`, `analyst`, `auditor` |
+| Field      | Type   | Required | Validation                             |
+| ---------- | ------ | -------- | -------------------------------------- |
+| `email`    | string | ✅       | Valid email                            |
+| `password` | string | ✅       | 8–128 chars                            |
+| `fullName` | string | ✅       | 1–255 chars                            |
+| `role`     | enum   | ✅       | `owner`, `admin`, `analyst`, `auditor` |
 
 **Response (201):** The created user (without password).
 
@@ -364,6 +390,7 @@ Create a new user in the organization.
 Update a user's profile or role.
 
 **Body:**
+
 ```json
 {
   "fullName": "Updated Name",
@@ -380,6 +407,7 @@ Update a user's profile or role.
 Delete a user. Cannot delete yourself.
 
 **Response (200):**
+
 ```json
 { "message": "User deleted successfully" }
 ```
@@ -400,24 +428,28 @@ All errors follow this structure:
 
 ### HTTP Status Codes
 
-| Code | Meaning |
-|------|---------|
-| 200 | Success |
-| 201 | Created |
-| 400 | Bad Request (e.g., empty update body) |
-| 401 | Unauthorized (missing/invalid token) |
-| 403 | Forbidden (RBAC / multi-tenant violation) |
-| 404 | Not Found |
-| 409 | Conflict (e.g., duplicate email) |
-| 422 | Validation Error |
-| 500 | Internal Server Error |
+| Code | Meaning                                   |
+| ---- | ----------------------------------------- |
+| 200  | Success                                   |
+| 201  | Created                                   |
+| 400  | Bad Request (e.g., empty update body)     |
+| 401  | Unauthorized (missing/invalid token)      |
+| 403  | Forbidden (RBAC / multi-tenant violation) |
+| 404  | Not Found                                 |
+| 409  | Conflict (e.g., duplicate email)          |
+| 422  | Validation Error                          |
+| 500  | Internal Server Error                     |
 
 ### Validation Errors (422)
 
 ```json
 {
   "errors": [
-    { "message": "The email field must be a valid email address", "rule": "email", "field": "email" }
+    {
+      "message": "The email field must be a valid email address",
+      "rule": "email",
+      "field": "email"
+    }
   ]
 }
 ```
@@ -428,12 +460,13 @@ All errors follow this structure:
 
 All list endpoints support server-side pagination.
 
-| Param | Default | Max |
-|-------|---------|-----|
-| `page` | 1 | — |
-| `limit` | 20 | 100 |
+| Param   | Default | Max |
+| ------- | ------- | --- |
+| `page`  | 1       | —   |
+| `limit` | 20      | 100 |
 
 Response always includes a `meta` object:
+
 ```json
 {
   "meta": {
@@ -451,12 +484,12 @@ Response always includes a `meta` object:
 
 🔒 indicates a protected endpoint. The permission required is shown after the lock icon.
 
-| Role | Permissions |
-|------|------------|
-| **Owner** | All permissions including `user:manage`, `org:delete` |
-| **Admin** | `supplier:create`, `supplier:read`, `supplier:update`, `supplier:delete`, `audit:read`, `risk_policy:configure` |
-| **Analyst** | `supplier:read`, `supplier:update_risk`, `supplier:add_notes` |
-| **Auditor** | `supplier:read`, `audit:read` |
+| Role        | Permissions                                                                                                     |
+| ----------- | --------------------------------------------------------------------------------------------------------------- |
+| **Owner**   | All permissions including `user:manage`, `org:delete`                                                           |
+| **Admin**   | `supplier:create`, `supplier:read`, `supplier:update`, `supplier:delete`, `audit:read`, `risk_policy:configure` |
+| **Analyst** | `supplier:read`, `supplier:update_risk`, `supplier:add_notes`                                                   |
+| **Auditor** | `supplier:read`, `audit:read`                                                                                   |
 
 ### Multi-tenant Isolation
 

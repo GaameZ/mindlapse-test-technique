@@ -10,12 +10,7 @@ export const createSupplierValidator = vine.compile(
     riskLevel: vine.enum(['critical', 'high', 'medium', 'low']),
     status: vine.enum(['active', 'under_review', 'inactive']),
     contractEndDate: vine.string().optional(),
-    notes: vine
-      .string()
-      .trim()
-      .maxLength(10000)
-      .regex(NOTES_REGEX)
-      .optional(),
+    notes: vine.string().trim().maxLength(10000).regex(NOTES_REGEX).optional(),
   })
 )
 
@@ -27,13 +22,7 @@ export const updateSupplierValidator = vine.compile(
     riskLevel: vine.enum(['critical', 'high', 'medium', 'low']).optional(),
     status: vine.enum(['active', 'under_review', 'inactive']).optional(),
     contractEndDate: vine.string().optional().nullable(),
-    notes: vine
-      .string()
-      .trim()
-      .maxLength(10000)
-      .regex(NOTES_REGEX)
-      .optional()
-      .nullable(),
+    notes: vine.string().trim().maxLength(10000).regex(NOTES_REGEX).optional().nullable(),
   })
 )
 
@@ -41,7 +30,9 @@ export const listSuppliersValidator = vine.compile(
   vine.object({
     page: vine.number().min(1).optional(),
     limit: vine.number().min(1).max(100).optional(),
-    sortBy: vine.enum(['name', 'domain', 'category', 'risk_level', 'status', 'created_at']).optional(),
+    sortBy: vine
+      .enum(['name', 'domain', 'category', 'risk_level', 'status', 'created_at'])
+      .optional(),
     sortOrder: vine.enum(['asc', 'desc']).optional(),
     search: vine.string().trim().maxLength(255).optional(),
     category: vine.enum(['saas', 'infrastructure', 'consulting', 'other']).optional(),

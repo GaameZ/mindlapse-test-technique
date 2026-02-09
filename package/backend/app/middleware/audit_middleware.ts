@@ -13,7 +13,7 @@ export default class AuditMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
     const { request, response, params } = ctx
     const user = ctx.auth?.user
-    
+
     if (!user) return next()
 
     const action = this.getActionFromMethod(request.method())
@@ -26,9 +26,10 @@ export default class AuditMiddleware {
 
     if (response.getStatus() >= 200 && response.getStatus() < 300) {
       const entityId = action === AuditAction.CREATE ? ctx.supplierId : supplierId
-      const after = action === AuditAction.DELETE 
-        ? null 
-        : await this.getSupplierState(entityId, user.organizationId)
+      const after =
+        action === AuditAction.DELETE
+          ? null
+          : await this.getSupplierState(entityId, user.organizationId)
 
       if (entityId) {
         await AuditService.log({
@@ -46,11 +47,15 @@ export default class AuditMiddleware {
 
   private getActionFromMethod(method: string): AuditAction | null {
     switch (method) {
-      case 'POST': return AuditAction.CREATE
+      case 'POST':
+        return AuditAction.CREATE
       case 'PUT':
-      case 'PATCH': return AuditAction.UPDATE
-      case 'DELETE': return AuditAction.DELETE
-      default: return null
+      case 'PATCH':
+        return AuditAction.UPDATE
+      case 'DELETE':
+        return AuditAction.DELETE
+      default:
+        return null
     }
   }
 

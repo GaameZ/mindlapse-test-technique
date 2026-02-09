@@ -1,6 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AuthService from '#services/auth_service'
-import { registerValidator, loginValidator, refreshTokenValidator } from '#validators/auth_validator'
+import {
+  registerValidator,
+  loginValidator,
+  refreshTokenValidator,
+} from '#validators/auth_validator'
 import { Role } from '@mindlapse/shared'
 import db from '#config/database'
 

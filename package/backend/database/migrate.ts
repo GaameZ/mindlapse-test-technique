@@ -1,10 +1,7 @@
 import path from 'node:path'
 import { promises as fs } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import {
-  Migrator,
-  FileMigrationProvider,
-} from 'kysely'
+import { Migrator, FileMigrationProvider } from 'kysely'
 import db from '../config/database.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))

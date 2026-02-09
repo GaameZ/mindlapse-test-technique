@@ -45,7 +45,11 @@ export interface SupplierTable {
   notes: ColumnType<string | null, string | null | undefined, string | null | undefined>
   organization_id: string
   ai_risk_score: ColumnType<number | null, number | null | undefined, number | null | undefined>
-  ai_analysis: ColumnType<Record<string, unknown> | null, string | null | undefined, string | null | undefined>
+  ai_analysis: ColumnType<
+    Record<string, unknown> | null,
+    string | null | undefined,
+    string | null | undefined
+  >
   created_at: CreatedAt
 }
 
@@ -59,8 +63,16 @@ export interface AuditLogTable {
   action: AuditAction
   entity_type: string
   entity_id: string
-  before: ColumnType<Record<string, unknown> | null, string | null | undefined, string | null | undefined>
-  after: ColumnType<Record<string, unknown> | null, string | null | undefined, string | null | undefined>
+  before: ColumnType<
+    Record<string, unknown> | null,
+    string | null | undefined,
+    string | null | undefined
+  >
+  after: ColumnType<
+    Record<string, unknown> | null,
+    string | null | undefined,
+    string | null | undefined
+  >
   ip_address: string
   created_at: CreatedAt
 }

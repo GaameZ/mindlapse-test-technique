@@ -12,10 +12,13 @@
     "dev": "pnpm -r --parallel run dev",
     "build": "pnpm -r run build",
     "lint": "pnpm -r run lint",
+    "format": "pnpm -r run format",
+    "format:check": "pnpm -r run format:check",
     "test": "pnpm -r run test"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
+    "prettier": "^3.8.1",
     "typescript": "^5.7.0"
   }
 }

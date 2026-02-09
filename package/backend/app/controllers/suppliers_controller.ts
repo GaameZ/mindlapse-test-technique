@@ -27,9 +27,7 @@ export default class SuppliersController {
     const sortOrder = query.sortOrder ?? 'desc'
     const offset = (page - 1) * limit
 
-    let baseQuery = db
-      .selectFrom('suppliers')
-      .where('organization_id', '=', user.organizationId)
+    let baseQuery = db.selectFrom('suppliers').where('organization_id', '=', user.organizationId)
 
     if (query.search) {
       baseQuery = baseQuery.where((eb) =>
@@ -161,7 +159,8 @@ export default class SuppliersController {
     if (payload.category !== undefined) updateData.category = payload.category
     if (payload.riskLevel !== undefined) updateData.risk_level = payload.riskLevel
     if (payload.status !== undefined) updateData.status = payload.status
-    if (payload.contractEndDate !== undefined) updateData.contract_end_date = payload.contractEndDate
+    if (payload.contractEndDate !== undefined)
+      updateData.contract_end_date = payload.contractEndDate
     if (payload.notes !== undefined) updateData.notes = payload.notes
 
     if (Object.keys(updateData).length === 0) {
