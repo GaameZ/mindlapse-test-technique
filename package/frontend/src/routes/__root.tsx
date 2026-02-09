@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '@/providers/ThemeProvider'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { PageNotFound } from '@/components/not-found'
+import { Toaster } from '@/components/ui/sonner'
 import { queryClient } from '@/lib/query-client'
 
 export const Route = createRootRoute({
@@ -16,6 +17,7 @@ function RootComponent() {
       <AuthProvider>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <Outlet />
+          <Toaster />
         </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
