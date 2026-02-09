@@ -1,6 +1,4 @@
 import * as React from 'react'
-import { type LucideIcon } from 'lucide-react'
-
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -8,16 +6,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import type { INavItem } from './nav-main'
 
 export function NavSecondary({
   items,
   ...props
 }: {
-  items: {
-    title: string
-    url: string
-    icon: LucideIcon
-  }[]
+  items: INavItem[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>

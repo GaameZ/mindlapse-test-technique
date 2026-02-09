@@ -1,9 +1,9 @@
 'use client'
 
 import * as React from 'react'
-import { Command, LifeBuoy, Send, SquareTerminal } from 'lucide-react'
+import { Command, LifeBuoy, Send, Warehouse } from 'lucide-react'
 
-import { NavMain } from '@/components/nav-main'
+import { NavMain, type INavItem } from '@/components/nav-main'
 import { NavSecondary } from '@/components/nav-secondary'
 import { NavUser } from '@/components/nav-user'
 import {
@@ -16,33 +16,32 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
-const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
-  navMain: [
-    {
-      title: 'Playground',
-      url: '#',
-      icon: SquareTerminal,
-      isActive: true,
-    },
-  ],
-  navSecondary: [
-    {
-      title: 'Support',
-      url: '#',
-      icon: LifeBuoy,
-    },
-    {
-      title: 'Feedback',
-      url: '#',
-      icon: Send,
-    },
-  ],
+const user = {
+  name: 'shadcn',
+  email: 'm@example.com',
+  avatar: '/avatars/shadcn.jpg',
 }
+
+const navMainItems: INavItem[] = [
+  {
+    title: 'Suppliers',
+    url: '/suppliers',
+    icon: Warehouse,
+  },
+]
+
+const navSecondaryItems: INavItem[] = [
+  {
+    title: 'Support',
+    url: '/',
+    icon: LifeBuoy,
+  },
+  {
+    title: 'Feedback',
+    url: '/',
+    icon: Send,
+  },
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -65,11 +64,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navMainItems} />
+        <NavSecondary items={navSecondaryItems} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )

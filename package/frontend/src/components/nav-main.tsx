@@ -11,21 +11,21 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
+import { Link, type LinkProps } from '@tanstack/react-router'
 
-export function NavMain({
-  items,
-}: {
-  items: {
+export interface INavItem {
+  title: string
+  url: LinkProps['to']
+  icon: LucideIcon
+  isActive?: boolean
+  items?: {
     title: string
-    url: string
-    icon: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
+    url: LinkProps['to']
   }[]
-}) {
+}
+
+export function NavMain({ items }: { items: INavItem[] }) {
+  console.log(items)
   return (
     <SidebarGroup>
       <SidebarMenu>
@@ -33,10 +33,10 @@ export function NavMain({
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={item.title}>
-                <a href={item.url}>
+                <Link to={item.url}>
                   <item.icon />
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
               {item.items?.length ? (
                 <>
