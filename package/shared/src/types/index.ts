@@ -31,8 +31,6 @@ export enum AuditAction {
   DELETE = 'DELETE',
 }
 
-// --- Interfaces ---
-
 export interface Organization {
   id: string
   name: string
@@ -76,4 +74,22 @@ export interface AuditLog {
   after: Record<string, unknown> | null
   ipAddress: string
   createdAt: string
+}
+
+export interface Tokens {
+  accessToken: string
+  refreshToken: string
+}
+
+export interface PaginationMeta {
+  total: number
+  page: number
+  lastPage: number
+  perPage: number
+}
+
+export interface ApiError {
+  error: string
+  message: string
+  details?: Record<string, unknown>
 }

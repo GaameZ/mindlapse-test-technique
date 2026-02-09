@@ -1,12 +1,43 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
+import { useAuth } from '@/contexts/AuthContext'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 
 export const Route = createFileRoute('/_authenticated')({
+  beforeLoad: ({ location }) => {
+    // Vérification côté client : si pas de token, redirect vers /login
+    const accessToken = sessionStorage.getItem('mindlapse_access_token')
+    const refreshToken = localStorage.getItem('mindlapse_refresh_token')
+
+    if (!accessToken && !refreshToken) {
+      throw redirect({
+        to: '/login',
+        search: {
+          redirect: location.href,
+        },
+      })
+    }
+  },
   component: AuthenticatedLayoutComponent,
 })
 
 function AuthenticatedLayoutComponent() {
+  const { isLoading, isAuthenticated } = useAuth()
+
+  // Afficher un loader pendant la vérification de l'auth
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    )
+  }
+
+  // Si pas authentifié après le loading, on sera redirigé par beforeLoad
+  if (!isAuthenticated) {
+    return null
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />

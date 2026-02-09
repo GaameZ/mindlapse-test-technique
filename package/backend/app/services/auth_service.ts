@@ -3,7 +3,7 @@ import bcryptjs from 'bcryptjs'
 import env from '#start/env'
 import db from '#config/database'
 import type { User } from '#database/types'
-import { Role } from '@mindlapse/shared'
+import { Role, type Tokens } from '@mindlapse/shared'
 
 const JWT_SECRET = env.get('JWT_SECRET')
 const ACCESS_TOKEN_EXPIRY = '15m'
@@ -16,11 +16,6 @@ export interface JwtPayload {
   organizationId: string
 }
 
-export interface AuthTokens {
-  accessToken: string
-  refreshToken: string
-}
-
 export default class AuthService {
   static async hashPassword(password: string): Promise<string> {
     return bcryptjs.hash(password, 12)
@@ -30,7 +25,7 @@ export default class AuthService {
     return bcryptjs.compare(password, hash)
   }
 
-  static generateTokens(payload: JwtPayload): AuthTokens {
+  static generateTokens(payload: JwtPayload): Tokens {
     const accessToken = jwt.sign(payload, JWT_SECRET, {
       expiresIn: ACCESS_TOKEN_EXPIRY,
     })
@@ -54,7 +49,7 @@ export default class AuthService {
     fullName: string
     role: Role
     organizationId: string
-  }): Promise<{ user: Omit<User, 'password_hash'>; tokens: AuthTokens }> {
+  }): Promise<{ user: Omit<User, 'password_hash'>; tokens: Tokens }> {
     const passwordHash = await this.hashPassword(data.password)
 
     const user = await db
@@ -83,7 +78,7 @@ export default class AuthService {
   static async login(
     email: string,
     password: string
-  ): Promise<{ user: Omit<User, 'password_hash'>; tokens: AuthTokens }> {
+  ): Promise<{ user: Omit<User, 'password_hash'>; tokens: Tokens }> {
     const user = await db
       .selectFrom('users')
       .selectAll()
@@ -110,7 +105,7 @@ export default class AuthService {
     return { user: safeUser, tokens }
   }
 
-  static async refreshTokens(refreshToken: string): Promise<AuthTokens> {
+  static async refreshTokens(refreshToken: string): Promise<Tokens> {
     const payload = this.verifyRefreshToken(refreshToken)
 
     const user = await db
