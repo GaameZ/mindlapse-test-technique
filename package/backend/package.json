@@ -9,6 +9,7 @@
     "build": "node ace build",
     "dev": "node ace serve --hmr",
     "db:migrate": "node --import tsx database/migrate.ts",
+    "db:seed": "node ace db:seed",
     "test": "node ace test",
     "lint": "eslint .",
     "format": "prettier --write .",

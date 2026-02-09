@@ -25,7 +25,6 @@ export interface INavItem {
 }
 
 export function NavMain({ items }: { items: INavItem[] }) {
-  console.log(items)
   return (
     <SidebarGroup>
       <SidebarMenu>
