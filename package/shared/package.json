@@ -13,6 +13,12 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "node --import tsx --test tests/**/*.spec.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2"
   }
 }

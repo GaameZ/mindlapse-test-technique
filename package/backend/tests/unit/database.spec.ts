@@ -1,15 +1,15 @@
 import { test } from '@japa/runner'
 import { sql } from 'kysely'
 import { Role, SupplierCategory, RiskLevel, SupplierStatus, AuditAction } from '@mindlapse/shared'
-import db from '../../config/database.js'
+import testDb from '../test_db.js'
 
 test.group('Organizations', (group) => {
   group.each.teardown(async () => {
-    await sql`TRUNCATE TABLE organizations CASCADE`.execute(db)
+    await sql`TRUNCATE TABLE organizations CASCADE`.execute(testDb)
   })
 
   test('should create an organization', async ({ assert }) => {
-    const result = await db
+    const result = await testDb
       .insertInto('organizations')
       .values({ name: 'Acme Corp' })
       .returningAll()
@@ -21,13 +21,13 @@ test.group('Organizations', (group) => {
   })
 
   test('should find an organization by id', async ({ assert }) => {
-    const created = await db
+    const created = await testDb
       .insertInto('organizations')
       .values({ name: 'Test Org' })
       .returningAll()
       .executeTakeFirstOrThrow()
 
-    const found = await db
+    const found = await testDb
       .selectFrom('organizations')
       .selectAll()
       .where('id', '=', created.id)
@@ -38,26 +38,26 @@ test.group('Organizations', (group) => {
   })
 
   test('should list all organizations', async ({ assert }) => {
-    await db
+    await testDb
       .insertInto('organizations')
       .values([{ name: 'Org A' }, { name: 'Org B' }])
       .execute()
 
-    const orgs = await db.selectFrom('organizations').selectAll().execute()
+    const orgs = await testDb.selectFrom('organizations').selectAll().execute()
 
     assert.lengthOf(orgs, 2)
   })
 
   test('should delete an organization', async ({ assert }) => {
-    const created = await db
+    const created = await testDb
       .insertInto('organizations')
       .values({ name: 'To Delete' })
       .returningAll()
       .executeTakeFirstOrThrow()
 
-    await db.deleteFrom('organizations').where('id', '=', created.id).execute()
+    await testDb.deleteFrom('organizations').where('id', '=', created.id).execute()
 
-    const found = await db
+    const found = await testDb
       .selectFrom('organizations')
       .selectAll()
       .where('id', '=', created.id)
@@ -71,7 +71,7 @@ test.group('Users', (group) => {
   let orgId: string
 
   group.setup(async () => {
-    const org = await db
+    const org = await testDb
       .insertInto('organizations')
       .values({ name: 'Test Org' })
       .returningAll()
@@ -80,15 +80,15 @@ test.group('Users', (group) => {
   })
 
   group.teardown(async () => {
-    await sql`TRUNCATE TABLE organizations CASCADE`.execute(db)
+    await sql`TRUNCATE TABLE organizations CASCADE`.execute(testDb)
   })
 
   group.each.teardown(async () => {
-    await sql`TRUNCATE TABLE users CASCADE`.execute(db)
+    await sql`TRUNCATE TABLE users CASCADE`.execute(testDb)
   })
 
   test('should create a user linked to an organization', async ({ assert }) => {
-    const user = await db
+    const user = await testDb
       .insertInto('users')
       .values({
         email: 'alice@acme.com',
@@ -108,7 +108,7 @@ test.group('Users', (group) => {
   })
 
   test('should enforce unique email', async ({ assert }) => {
-    await db
+    await testDb
       .insertInto('users')
       .values({
         email: 'duplicate@acme.com',
@@ -120,7 +120,7 @@ test.group('Users', (group) => {
       .execute()
 
     try {
-      await db
+      await testDb
         .insertInto('users')
         .values({
           email: 'duplicate@acme.com',
@@ -137,7 +137,7 @@ test.group('Users', (group) => {
   })
 
   test('should find users by organization', async ({ assert }) => {
-    await db
+    await testDb
       .insertInto('users')
       .values([
         {
@@ -157,7 +157,7 @@ test.group('Users', (group) => {
       ])
       .execute()
 
-    const users = await db
+    const users = await testDb
       .selectFrom('users')
       .selectAll()
       .where('organization_id', '=', orgId)
@@ -167,7 +167,7 @@ test.group('Users', (group) => {
   })
 
   test('should cascade delete users when organization is deleted', async ({ assert }) => {
-    await db
+    await testDb
       .insertInto('users')
       .values({
         email: 'cascade@acme.com',
@@ -178,9 +178,9 @@ test.group('Users', (group) => {
       })
       .execute()
 
-    await db.deleteFrom('organizations').where('id', '=', orgId).execute()
+    await testDb.deleteFrom('organizations').where('id', '=', orgId).execute()
 
-    const users = await db
+    const users = await testDb
       .selectFrom('users')
       .selectAll()
       .where('organization_id', '=', orgId)
@@ -194,7 +194,7 @@ test.group('Suppliers', (group) => {
   let orgId: string
 
   group.setup(async () => {
-    const org = await db
+    const org = await testDb
       .insertInto('organizations')
       .values({ name: 'Supplier Org' })
       .returningAll()
@@ -203,15 +203,15 @@ test.group('Suppliers', (group) => {
   })
 
   group.teardown(async () => {
-    await sql`TRUNCATE TABLE organizations CASCADE`.execute(db)
+    await sql`TRUNCATE TABLE organizations CASCADE`.execute(testDb)
   })
 
   group.each.teardown(async () => {
-    await sql`TRUNCATE TABLE suppliers CASCADE`.execute(db)
+    await sql`TRUNCATE TABLE suppliers CASCADE`.execute(testDb)
   })
 
   test('should create a supplier', async ({ assert }) => {
-    const supplier = await db
+    const supplier = await testDb
       .insertInto('suppliers')
       .values({
         name: 'CloudGuard',
@@ -235,7 +235,7 @@ test.group('Suppliers', (group) => {
   })
 
   test('should update a supplier risk level', async ({ assert }) => {
-    const supplier = await db
+    const supplier = await testDb
       .insertInto('suppliers')
       .values({
         name: 'InfraNet',
@@ -248,13 +248,13 @@ test.group('Suppliers', (group) => {
       .returningAll()
       .executeTakeFirstOrThrow()
 
-    await db
+    await testDb
       .updateTable('suppliers')
       .set({ risk_level: RiskLevel.CRITICAL })
       .where('id', '=', supplier.id)
       .execute()
 
-    const updated = await db
+    const updated = await testDb
       .selectFrom('suppliers')
       .selectAll()
       .where('id', '=', supplier.id)
@@ -270,7 +270,7 @@ test.group('Suppliers', (group) => {
       recommendation: 'Upgrade TLS and enable MFA',
     }
 
-    const supplier = await db
+    const supplier = await testDb
       .insertInto('suppliers')
       .values({
         name: 'AI Tested',
@@ -292,7 +292,7 @@ test.group('Suppliers', (group) => {
   })
 
   test('should filter suppliers by risk level within an organization', async ({ assert }) => {
-    await db
+    await testDb
       .insertInto('suppliers')
       .values([
         {
@@ -314,7 +314,7 @@ test.group('Suppliers', (group) => {
       ])
       .execute()
 
-    const critical = await db
+    const critical = await testDb
       .selectFrom('suppliers')
       .selectAll()
       .where('organization_id', '=', orgId)
@@ -326,7 +326,7 @@ test.group('Suppliers', (group) => {
   })
 
   test('should cascade delete suppliers when organization is deleted', async ({ assert }) => {
-    await db
+    await testDb
       .insertInto('suppliers')
       .values({
         name: 'Cascade Supplier',
@@ -338,9 +338,9 @@ test.group('Suppliers', (group) => {
       })
       .execute()
 
-    await db.deleteFrom('organizations').where('id', '=', orgId).execute()
+    await testDb.deleteFrom('organizations').where('id', '=', orgId).execute()
 
-    const suppliers = await db
+    const suppliers = await testDb
       .selectFrom('suppliers')
       .selectAll()
       .where('organization_id', '=', orgId)
@@ -356,14 +356,14 @@ test.group('Audit Logs', (group) => {
   let supplierId: string
 
   group.setup(async () => {
-    const org = await db
+    const org = await testDb
       .insertInto('organizations')
       .values({ name: 'Audit Org' })
       .returningAll()
       .executeTakeFirstOrThrow()
     orgId = org.id
 
-    const user = await db
+    const user = await testDb
       .insertInto('users')
       .values({
         email: 'auditor@acme.com',
@@ -376,7 +376,7 @@ test.group('Audit Logs', (group) => {
       .executeTakeFirstOrThrow()
     userId = user.id
 
-    const supplier = await db
+    const supplier = await testDb
       .insertInto('suppliers')
       .values({
         name: 'Audited Supplier',
@@ -392,15 +392,15 @@ test.group('Audit Logs', (group) => {
   })
 
   group.teardown(async () => {
-    await sql`TRUNCATE TABLE organizations CASCADE`.execute(db)
+    await sql`TRUNCATE TABLE organizations CASCADE`.execute(testDb)
   })
 
   group.each.teardown(async () => {
-    await sql`TRUNCATE TABLE audit_logs CASCADE`.execute(db)
+    await sql`TRUNCATE TABLE audit_logs CASCADE`.execute(testDb)
   })
 
   test('should create an audit log entry on supplier creation', async ({ assert }) => {
-    const log = await db
+    const log = await testDb
       .insertInto('audit_logs')
       .values({
         user_id: userId,
@@ -427,7 +427,7 @@ test.group('Audit Logs', (group) => {
     const beforeState = { risk_level: 'medium' }
     const afterState = { risk_level: 'critical' }
 
-    const log = await db
+    const log = await testDb
       .insertInto('audit_logs')
       .values({
         user_id: userId,
@@ -448,7 +448,7 @@ test.group('Audit Logs', (group) => {
   })
 
   test('should list audit logs in chronological order', async ({ assert }) => {
-    await db
+    await testDb
       .insertInto('audit_logs')
       .values([
         {
@@ -481,7 +481,7 @@ test.group('Audit Logs', (group) => {
       ])
       .execute()
 
-    const logs = await db
+    const logs = await testDb
       .selectFrom('audit_logs')
       .selectAll()
       .where('entity_id', '=', supplierId)
@@ -496,7 +496,7 @@ test.group('Audit Logs', (group) => {
 
   test('should enforce foreign key on user_id', async ({ assert }) => {
     try {
-      await db
+      await testDb
         .insertInto('audit_logs')
         .values({
           user_id: '00000000-0000-0000-0000-000000000000',
@@ -520,21 +520,21 @@ test.group('Multi-tenant isolation', (group) => {
   let orgBId: string
 
   group.setup(async () => {
-    const orgA = await db
+    const orgA = await testDb
       .insertInto('organizations')
       .values({ name: 'Organization A' })
       .returningAll()
       .executeTakeFirstOrThrow()
     orgAId = orgA.id
 
-    const orgB = await db
+    const orgB = await testDb
       .insertInto('organizations')
       .values({ name: 'Organization B' })
       .returningAll()
       .executeTakeFirstOrThrow()
     orgBId = orgB.id
 
-    await db
+    await testDb
       .insertInto('suppliers')
       .values([
         {
@@ -558,11 +558,11 @@ test.group('Multi-tenant isolation', (group) => {
   })
 
   group.teardown(async () => {
-    await sql`TRUNCATE TABLE organizations CASCADE`.execute(db)
+    await sql`TRUNCATE TABLE organizations CASCADE`.execute(testDb)
   })
 
   test('org A should only see its own suppliers', async ({ assert }) => {
-    const suppliers = await db
+    const suppliers = await testDb
       .selectFrom('suppliers')
       .selectAll()
       .where('organization_id', '=', orgAId)
@@ -573,7 +573,7 @@ test.group('Multi-tenant isolation', (group) => {
   })
 
   test('org B should only see its own suppliers', async ({ assert }) => {
-    const suppliers = await db
+    const suppliers = await testDb
       .selectFrom('suppliers')
       .selectAll()
       .where('organization_id', '=', orgBId)
@@ -584,7 +584,7 @@ test.group('Multi-tenant isolation', (group) => {
   })
 
   test('scoped query should never return data from another org', async ({ assert }) => {
-    const suppliersA = await db
+    const suppliersA = await testDb
       .selectFrom('suppliers')
       .selectAll()
       .where('organization_id', '=', orgAId)
