@@ -1,0 +1,1327 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Mindlapse Cyber Risk Intelligence Platform API",
+    "version": "1.0.0",
+    "description": "API pour la plateforme de gestion du risque cyber multi-tenant avec évaluation IA, RBAC et audit trail.",
+    "contact": {
+      "name": "Mindlapse Support",
+      "email": "support@mindlapse.io"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3333/api/v1",
+      "description": "Development server"
+    },
+    {
+      "url": "https://api.mindlapse.io/api/v1",
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Endpoints d'authentification (register, login, refresh)"
+    },
+    {
+      "name": "Suppliers",
+      "description": "Gestion des fournisseurs (CRUD + audit logs)"
+    },
+    {
+      "name": "Users",
+      "description": "Gestion des utilisateurs (RBAC: Owner only)"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Créer un compte utilisateur",
+        "description": "Crée une nouvelle organisation + user Owner, ou rejoint une organisation existante comme Analyst.",
+        "operationId": "register",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password", "fullName"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "alice@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "SecurePass123"
+                  },
+                  "fullName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255,
+                    "example": "Alice Dupont"
+                  },
+                  "organizationName": {
+                    "type": "string",
+                    "description": "Nom de la nouvelle organisation (crée une org + user Owner)",
+                    "example": "Acme Corp"
+                  },
+                  "organizationId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "UUID d'une organisation existante (rejoint comme Analyst)",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User créé avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "tokens": {
+                          "$ref": "#/components/schemas/Tokens"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitError"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Se connecter",
+        "description": "Authentifie un utilisateur et retourne un access token + refresh token.",
+        "operationId": "login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "alice@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "SecurePass123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentification réussie",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "tokens": {
+                          "$ref": "#/components/schemas/Tokens"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimitError"
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Rafraîchir le token",
+        "description": "Utilise le refresh token pour obtenir un nouvel access token.",
+        "operationId": "refresh",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["refreshToken"],
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token rafraîchi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "tokens": {
+                          "$ref": "#/components/schemas/Tokens"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Obtenir l'utilisateur connecté",
+        "description": "Retourne les informations de l'utilisateur authentifié.",
+        "operationId": "me",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Utilisateur connecté",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "$ref": "#/components/schemas/User"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/suppliers": {
+      "get": {
+        "tags": ["Suppliers"],
+        "summary": "Lister les fournisseurs",
+        "description": "Liste paginée des fournisseurs de l'organisation (avec filtres).",
+        "operationId": "listSuppliers",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Recherche sur name/domain",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/SupplierCategory"
+            }
+          },
+          {
+            "name": "riskLevel",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/RiskLevel"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/SupplierStatus"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["name", "domain", "risk_level", "created_at", "updated_at"],
+              "default": "created_at"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"],
+              "default": "desc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des fournisseurs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Supplier"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Suppliers"],
+        "summary": "Créer un fournisseur",
+        "description": "Crée un nouveau fournisseur (permission: supplier:create).",
+        "operationId": "createSupplier",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSupplierInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Fournisseur créé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Supplier"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/suppliers/{id}": {
+      "get": {
+        "tags": ["Suppliers"],
+        "summary": "Obtenir un fournisseur",
+        "description": "Récupère les détails d'un fournisseur par ID.",
+        "operationId": "getSupplier",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fournisseur trouvé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Supplier"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Suppliers"],
+        "summary": "Mettre à jour un fournisseur",
+        "description": "Modifie un fournisseur existant (permission: supplier:update).",
+        "operationId": "updateSupplier",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSupplierInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fournisseur mis à jour",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Supplier"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Suppliers"],
+        "summary": "Supprimer un fournisseur",
+        "description": "Supprime un fournisseur (permission: supplier:delete).",
+        "operationId": "deleteSupplier",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Fournisseur supprimé"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/suppliers/{supplierId}/audit-logs": {
+      "get": {
+        "tags": ["Suppliers"],
+        "summary": "Audit logs d'un fournisseur",
+        "description": "Liste paginée de l'historique des modifications (permission: audit:read).",
+        "operationId": "getSupplierAuditLogs",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "supplierId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des logs d'audit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AuditLog"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Lister les utilisateurs",
+        "description": "Liste paginée des utilisateurs de l'organisation (permission: user:manage).",
+        "operationId": "listUsers",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des utilisateurs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Créer un utilisateur",
+        "description": "Crée un nouvel utilisateur dans l'organisation (permission: user:manage).",
+        "operationId": "createUser",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Utilisateur créé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Obtenir un utilisateur",
+        "description": "Récupère les détails d'un utilisateur (permission: user:manage).",
+        "operationId": "getUser",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Utilisateur trouvé",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Mettre à jour un utilisateur",
+        "description": "Modifie un utilisateur (permission: user:manage).",
+        "operationId": "updateUser",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Utilisateur mis à jour",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Supprimer un utilisateur",
+        "description": "Supprime un utilisateur (permission: user:manage).",
+        "operationId": "deleteUser",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Utilisateur supprimé"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT access token obtenu via /auth/login ou /auth/register"
+      }
+    },
+    "schemas": {
+      "Tokens": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token (durée: 15 min)",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "JWT refresh token (durée: 7 jours)",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "alice@example.com"
+          },
+          "fullName": {
+            "type": "string",
+            "example": "Alice Dupont"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "org-123e4567-e89b-12d3-a456-426614174000"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-02-09T10:30:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-02-09T10:30:00Z"
+          }
+        }
+      },
+      "Supplier": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "AWS"
+          },
+          "domain": {
+            "type": "string",
+            "example": "aws.amazon.com"
+          },
+          "category": {
+            "$ref": "#/components/schemas/SupplierCategory"
+          },
+          "riskLevel": {
+            "$ref": "#/components/schemas/RiskLevel"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SupplierStatus"
+          },
+          "contractEndDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "example": "2027-12-31"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 10000,
+            "example": "Fournisseur cloud principal"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "aiRiskScore": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 100,
+            "example": 42
+          },
+          "aiAnalysis": {
+            "type": "object",
+            "nullable": true,
+            "description": "Analyse IA (JSON)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AuditLog": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "$ref": "#/components/schemas/AuditAction"
+          },
+          "entityType": {
+            "type": "string",
+            "example": "supplier"
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "before": {
+            "type": "object",
+            "nullable": true,
+            "description": "État avant modification (null pour CREATE)"
+          },
+          "after": {
+            "type": "object",
+            "nullable": true,
+            "description": "État après modification (null pour DELETE)"
+          },
+          "ipAddress": {
+            "type": "string",
+            "nullable": true,
+            "example": "192.168.1.1"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateSupplierInput": {
+        "type": "object",
+        "required": ["name", "domain", "category", "riskLevel", "status"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "example": "AWS"
+          },
+          "domain": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "example": "aws.amazon.com"
+          },
+          "category": {
+            "$ref": "#/components/schemas/SupplierCategory"
+          },
+          "riskLevel": {
+            "$ref": "#/components/schemas/RiskLevel"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SupplierStatus"
+          },
+          "contractEndDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 10000,
+            "nullable": true,
+            "pattern": "^[a-zA-Z0-9\\s\\.,;:!?\\-()'\"-]*$",
+            "description": "Texte alphanumérique + ponctuation basique (protection XSS)"
+          }
+        }
+      },
+      "UpdateSupplierInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "domain": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "category": {
+            "$ref": "#/components/schemas/SupplierCategory"
+          },
+          "riskLevel": {
+            "$ref": "#/components/schemas/RiskLevel"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SupplierStatus"
+          },
+          "contractEndDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 10000,
+            "nullable": true,
+            "pattern": "^[a-zA-Z0-9\\s\\.,;:!?\\-()'\"-]*$"
+          }
+        }
+      },
+      "CreateUserInput": {
+        "type": "object",
+        "required": ["email", "password", "fullName", "role"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          },
+          "fullName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        }
+      },
+      "UpdateUserInput": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8
+          },
+          "fullName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        }
+      },
+      "Role": {
+        "type": "string",
+        "enum": ["owner", "admin", "analyst", "auditor"],
+        "description": "Rôles RBAC (owner > admin > analyst > auditor)",
+        "example": "admin"
+      },
+      "SupplierCategory": {
+        "type": "string",
+        "enum": ["saas", "infrastructure", "consulting", "hardware", "other"],
+        "example": "saas"
+      },
+      "RiskLevel": {
+        "type": "string",
+        "enum": ["critical", "high", "medium", "low"],
+        "example": "medium"
+      },
+      "SupplierStatus": {
+        "type": "string",
+        "enum": ["active", "inactive", "pending", "offboarded"],
+        "example": "active"
+      },
+      "AuditAction": {
+        "type": "string",
+        "enum": ["create", "update", "delete"],
+        "example": "update"
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "example": 42
+          },
+          "page": {
+            "type": "integer",
+            "example": 1
+          },
+          "lastPage": {
+            "type": "integer",
+            "example": 2
+          },
+          "perPage": {
+            "type": "integer",
+            "example": 25
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "VALIDATION_ERROR"
+          },
+          "message": {
+            "type": "string",
+            "example": "Validation failed"
+          },
+          "details": {
+            "type": "object",
+            "nullable": true,
+            "description": "Détails additionnels (ex: champs invalides)"
+          }
+        }
+      }
+    },
+    "responses": {
+      "UnauthorizedError": {
+        "description": "Non authentifié (token manquant/invalide/expiré)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "UNAUTHORIZED",
+              "message": "Invalid or expired token"
+            }
+          }
+        }
+      },
+      "ForbiddenError": {
+        "description": "Permission insuffisante (RBAC)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "FORBIDDEN",
+              "message": "You do not have the permission 'supplier:delete' to perform this action"
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "Ressource non trouvée (ou isolation multi-tenant)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "NOT_FOUND",
+              "message": "Resource not found"
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "description": "Données invalides (validation Vine)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "VALIDATION_ERROR",
+              "message": "Validation failed",
+              "details": {
+                "email": ["The email field must be a valid email address"],
+                "password": ["The password field must have at least 8 characters"]
+              }
+            }
+          }
+        }
+      },
+      "RateLimitError": {
+        "description": "Trop de requêtes (rate limiting)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "TOO_MANY_REQUESTS",
+              "message": "Too many requests. Please try again later."
+            }
+          }
+        }
+      }
+    }
+  }
+}
