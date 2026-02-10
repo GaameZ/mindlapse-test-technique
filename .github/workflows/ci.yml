@@ -81,6 +81,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build shared package
+        run: pnpm --filter @mindlapse/shared build
+
       - name: Run database migrations
         run: pnpm --filter @mindlapse/backend db:migrate
         env:
