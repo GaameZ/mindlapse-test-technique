@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react'
 import { type ColumnDef, type SortingState } from '@tanstack/react-table'
-import { useNavigate, useSearch, Link } from '@tanstack/react-router'
-import { Eye } from 'lucide-react'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { DataTable, SortableColumnHeader } from '@/components/ui/data-table'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { SuppliersFilters } from '@/components/suppliers/suppliers-filters'
+import { SupplierActions } from '@/components/suppliers/supplier-actions'
 import { useSuppliers, type SuppliersParams } from '@/hooks/queries/use-suppliers'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import {
@@ -183,14 +182,7 @@ export function SuppliersTable() {
         header: 'Actions',
         cell: ({ row }) => {
           const supplier = row.original
-          return (
-            <Link to="/suppliers/$supplierId" params={{ supplierId: supplier.id }}>
-              <Button variant="ghost" size="sm">
-                <Eye className="h-4 w-4" />
-                View
-              </Button>
-            </Link>
-          )
+          return <SupplierActions supplier={supplier} />
         },
       },
     ],

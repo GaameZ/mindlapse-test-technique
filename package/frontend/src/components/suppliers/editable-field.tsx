@@ -61,7 +61,7 @@ export function EditableField({
   options,
 }: EditableFieldProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const updateSupplier = useUpdateSupplier()
+  const { mutate: updateSupplier, isPending } = useUpdateSupplier()
 
   const schema = z.object({
     [field]: z.string().optional(),
@@ -76,18 +76,20 @@ export function EditableField({
 
   const currentValue = watch(field)
 
-  const onSubmit = async (data: any) => {
-    try {
-      await updateSupplier.mutateAsync({
+  const onSubmit = (data: any) => {
+    updateSupplier(
+      {
         id: supplierId,
         data: {
           [field]: data[field] || undefined,
         },
-      })
-      setIsEditing(false)
-    } catch {
-      // Error toast is handled by the mutation
-    }
+      },
+      {
+        onSuccess: () => {
+          setIsEditing(false)
+        },
+      }
+    )
   }
 
   const handleCancel = () => {
@@ -147,8 +149,8 @@ export function EditableField({
           )}
 
           <div className="flex gap-2">
-            <Button type="submit" size="sm" disabled={updateSupplier.isPending} className="h-8">
-              {updateSupplier.isPending ? (
+            <Button type="submit" size="sm" disabled={isPending} className="h-8">
+              {isPending ? (
                 <>
                   <LoadingSpinner size="sm" className="mr-2" />
                   Saving...
@@ -165,7 +167,7 @@ export function EditableField({
               variant="outline"
               size="sm"
               onClick={handleCancel}
-              disabled={updateSupplier.isPending}
+              disabled={isPending}
               className="h-8"
             >
               <X className="mr-2 h-3 w-3" />

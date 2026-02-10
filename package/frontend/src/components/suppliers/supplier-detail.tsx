@@ -1,9 +1,21 @@
+import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSupplier } from '@/hooks/queries/use-suppliers'
+import { useDeleteSupplier } from '@/hooks/mutations/use-suppliers'
 import { EditableField } from '@/components/suppliers/editable-field'
 import { SupplierAuditLogs } from '@/components/suppliers/supplier-audit-logs'
 
@@ -14,6 +26,17 @@ interface SupplierDetailProps {
 export function SupplierDetail({ supplierId }: SupplierDetailProps) {
   const navigate = useNavigate()
   const { data: supplier, isLoading, error } = useSupplier(supplierId)
+  const { mutate: deleteSupplier, isPending } = useDeleteSupplier()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+  const handleDelete = () => {
+    deleteSupplier(supplierId, {
+      onSuccess: () => {
+        setShowDeleteDialog(false)
+        navigate({ to: '/' })
+      },
+    })
+  }
 
   if (isLoading) {
     return (
@@ -49,7 +72,41 @@ export function SupplierDetail({ supplierId }: SupplierDetailProps) {
             <p className="text-muted-foreground">{supplierData.domain}</p>
           </div>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowDeleteDialog(true)}
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete
+        </Button>
       </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Supplier</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{supplierData.name}</strong>? This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault()
+                handleDelete()
+              }}
+              disabled={isPending}
+              variant="destructive"
+            >
+              {isPending ? <LoadingSpinner /> : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -144,8 +201,6 @@ export function SupplierDetail({ supplierId }: SupplierDetailProps) {
             </CardContent>
           </Card>
         </div>
-
-        {/* Audit Logs Sidebar */}
         <div className="lg:col-span-1">
           <SupplierAuditLogs supplierId={supplierId} />
         </div>

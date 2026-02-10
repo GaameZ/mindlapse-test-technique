@@ -52,12 +52,12 @@ function FormError({ id, message }: FormErrorProps) {
 
 export function CreateSupplierDialog() {
   const [open, setOpen] = useState(false)
-  const createSupplier = useCreateSupplier()
+  const { mutate: createSupplier, isPending } = useCreateSupplier()
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     setValue,
     watch,
     reset,
@@ -78,18 +78,20 @@ export function CreateSupplierDialog() {
   const riskLevelValue = watch('riskLevel')
   const statusValue = watch('status')
 
-  const onSubmit = async (data: CreateSupplierFormData) => {
-    try {
-      await createSupplier.mutateAsync({
+  const onSubmit = (data: CreateSupplierFormData) => {
+    createSupplier(
+      {
         ...data,
         contractEndDate: data.contractEndDate || undefined,
         notes: data.notes || undefined,
-      })
-      reset()
-      setOpen(false)
-    } catch {
-      // Error toast is handled by the mutation
-    }
+      },
+      {
+        onSuccess: () => {
+          reset()
+          setOpen(false)
+        },
+      }
+    )
   }
 
   return (
@@ -258,12 +260,12 @@ export function CreateSupplierDialog() {
                 reset()
                 setOpen(false)
               }}
-              disabled={isSubmitting}
+              disabled={isPending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
-              {isSubmitting ? (
+            <Button type="submit" disabled={isPending} aria-busy={isPending}>
+              {isPending ? (
                 <>
                   <LoadingSpinner size="sm" className="mr-2" />
                   Creating...
