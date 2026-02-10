@@ -11,13 +11,13 @@ export const createSupplierSchema = z.object({
     .string()
     .min(1, 'Domain is required')
     .regex(/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i, 'Invalid domain format (e.g., example.com)'),
-  category: z.nativeEnum(SupplierCategory, {
+  category: z.enum(SupplierCategory, {
     message: 'Please select a valid category',
   }),
-  riskLevel: z.nativeEnum(RiskLevel, {
+  riskLevel: z.enum(RiskLevel, {
     message: 'Please select a valid risk level',
   }),
-  status: z.nativeEnum(SupplierStatus, {
+  status: z.enum(SupplierStatus, {
     message: 'Please select a valid status',
   }),
   contractEndDate: z

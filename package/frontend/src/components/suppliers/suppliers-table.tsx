@@ -1,12 +1,16 @@
 import { useMemo, useState } from 'react'
 import { type ColumnDef, type SortingState } from '@tanstack/react-table'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { DataTable, SortableColumnHeader } from '@/components/ui/data-table'
 import { Badge } from '@/components/ui/badge'
+import { SuppliersFilters } from '@/components/suppliers/suppliers-filters'
 import { useSuppliers, type SuppliersParams } from '@/hooks/queries/use-suppliers'
+import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import {
   type Supplier,
   type RiskLevel,
   type SupplierStatus,
+  type SupplierCategory,
   DEFAULT_PAGE_SIZE,
 } from '@mindlapse/shared'
 import { formatDate } from '@/lib/utils'
@@ -34,13 +38,33 @@ const statusVariants: Record<SupplierStatus, 'default' | 'secondary' | 'destruct
   }
 
 export function SuppliersTable() {
-  const [page, setPage] = useState(1)
+  const navigate = useNavigate({ from: '/' })
+  const searchParams = useSearch({ from: '/_authenticated/' })
   const [sorting, setSorting] = useState<SortingState>([])
+
+  const [searchInput, setSearchInput] = useState(searchParams.search || '')
+  const debouncedSearch = useDebouncedValue(searchInput, 500)
+
+  useMemo(() => {
+    if (debouncedSearch !== searchParams.search) {
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          search: debouncedSearch || undefined,
+          page: 1,
+        }),
+      })
+    }
+  }, [debouncedSearch, searchParams.search, navigate])
 
   const params: SuppliersParams = useMemo(() => {
     const baseParams: SuppliersParams = {
-      page,
+      page: searchParams.page || 1,
       limit: DEFAULT_PAGE_SIZE,
+      search: searchParams.search,
+      category: searchParams.category,
+      riskLevel: searchParams.riskLevel,
+      status: searchParams.status,
     }
 
     if (sorting.length > 0) {
@@ -56,9 +80,42 @@ export function SuppliersTable() {
     }
 
     return baseParams
-  }, [page, sorting])
+  }, [searchParams, sorting])
 
   const { data, isLoading } = useSuppliers(params)
+
+  const handlePageChange = (page: number) => {
+    navigate({
+      search: (prev) => ({ ...prev, page }),
+    })
+  }
+
+  const handleCategoryChange = (category: SupplierCategory | undefined) => {
+    navigate({
+      search: (prev) => ({ ...prev, category, page: 1 }),
+    })
+  }
+
+  const handleRiskLevelChange = (riskLevel: RiskLevel | undefined) => {
+    navigate({
+      search: (prev) => ({ ...prev, riskLevel, page: 1 }),
+    })
+  }
+
+  const handleStatusChange = (status: SupplierStatus | undefined) => {
+    navigate({
+      search: (prev) => ({ ...prev, status, page: 1 }),
+    })
+  }
+
+  const handleClearFilters = () => {
+    setSearchInput('')
+    navigate({
+      search: {
+        page: 1,
+      },
+    })
+  }
 
   const columns = useMemo<ColumnDef<Supplier>[]>(
     () => [
@@ -124,14 +181,27 @@ export function SuppliersTable() {
   )
 
   return (
-    <DataTable
-      columns={columns}
-      data={data?.data ?? []}
-      meta={data?.meta}
-      isLoading={isLoading}
-      sorting={sorting}
-      onSortingChange={setSorting}
-      onPageChange={setPage}
-    />
+    <div className="space-y-4">
+      <SuppliersFilters
+        search={searchInput}
+        category={searchParams.category}
+        riskLevel={searchParams.riskLevel}
+        status={searchParams.status}
+        onSearchChange={setSearchInput}
+        onCategoryChange={handleCategoryChange}
+        onRiskLevelChange={handleRiskLevelChange}
+        onStatusChange={handleStatusChange}
+        onClearFilters={handleClearFilters}
+      />
+      <DataTable
+        columns={columns}
+        data={data?.data ?? []}
+        meta={data?.meta}
+        isLoading={isLoading}
+        sorting={sorting}
+        onSortingChange={setSorting}
+        onPageChange={handlePageChange}
+      />
+    </div>
   )
 }

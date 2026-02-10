@@ -1,7 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { SuppliersTable } from '@/components/suppliers/suppliers-table'
+import { SupplierCategory, RiskLevel, SupplierStatus } from '@mindlapse/shared'
+import { z } from 'zod'
+
+const suppliersSearchSchema = z.object({
+  page: z.number().int().positive().optional().catch(1),
+  search: z.string().optional().catch(undefined),
+  category: z.enum(SupplierCategory).optional().catch(undefined),
+  riskLevel: z.enum(RiskLevel).optional().catch(undefined),
+  status: z.enum(SupplierStatus).optional().catch(undefined),
+})
 
 export const Route = createFileRoute('/_authenticated/')({
+  validateSearch: suppliersSearchSchema,
   component: RouteComponent,
 })
 
