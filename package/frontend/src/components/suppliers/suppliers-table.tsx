@@ -14,7 +14,7 @@ import {
   DEFAULT_PAGE_SIZE,
 } from '@mindlapse/shared'
 import { formatDate } from '@/lib/utils'
-import { formatStatus } from '@/lib/suppliers.utils'
+import { CATEGORY_LABELS, RISK_LEVEL_LABELS, STATUS_LABELS } from '@/lib/supplier-enums'
 
 const riskLevelVariants: Record<RiskLevel, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   critical: 'destructive',
@@ -62,9 +62,9 @@ export function SuppliersTable() {
       page: searchParams.page || 1,
       limit: DEFAULT_PAGE_SIZE,
       search: searchParams.search,
-      category: searchParams.category,
-      riskLevel: searchParams.riskLevel,
-      status: searchParams.status,
+      category: searchParams.category as SupplierCategory | undefined,
+      riskLevel: searchParams.riskLevel as RiskLevel | undefined,
+      status: searchParams.status as SupplierStatus | undefined,
     }
 
     if (sorting.length > 0) {
@@ -133,8 +133,8 @@ export function SuppliersTable() {
         accessorKey: 'category',
         header: 'Category',
         cell: ({ row }) => {
-          const category = row.getValue('category') as string
-          return <Badge variant="outline">{category.toUpperCase()}</Badge>
+          const category = row.getValue('category') as SupplierCategory
+          return <Badge variant="outline">{CATEGORY_LABELS[category]}</Badge>
         },
       },
       {
@@ -144,7 +144,7 @@ export function SuppliersTable() {
           const riskLevel = row.getValue('riskLevel') as RiskLevel
           return (
             <Badge variant={riskLevelVariants[riskLevel]} className={riskLevelColors[riskLevel]}>
-              {riskLevel.toUpperCase()}
+              {RISK_LEVEL_LABELS[riskLevel]}
             </Badge>
           )
         },
@@ -154,7 +154,7 @@ export function SuppliersTable() {
         header: 'Status',
         cell: ({ row }) => {
           const status = row.getValue('status') as SupplierStatus
-          return <Badge variant={statusVariants[status]}>{formatStatus(status)}</Badge>
+          return <Badge variant={statusVariants[status]}>{STATUS_LABELS[status]}</Badge>
         },
       },
       {
@@ -184,9 +184,9 @@ export function SuppliersTable() {
     <div className="space-y-4">
       <SuppliersFilters
         search={searchInput}
-        category={searchParams.category}
-        riskLevel={searchParams.riskLevel}
-        status={searchParams.status}
+        category={searchParams.category as SupplierCategory | undefined}
+        riskLevel={searchParams.riskLevel as RiskLevel | undefined}
+        status={searchParams.status as SupplierStatus | undefined}
         onSearchChange={setSearchInput}
         onCategoryChange={handleCategoryChange}
         onRiskLevelChange={handleRiskLevelChange}

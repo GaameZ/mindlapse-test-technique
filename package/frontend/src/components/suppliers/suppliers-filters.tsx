@@ -9,6 +9,14 @@ import {
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 import { SupplierCategory, RiskLevel, SupplierStatus } from '@mindlapse/shared'
+import {
+  SUPPLIER_CATEGORIES,
+  RISK_LEVELS,
+  SUPPLIER_STATUSES,
+  CATEGORY_LABELS,
+  RISK_LEVEL_LABELS,
+  STATUS_LABELS,
+} from '@/lib/supplier-enums'
 
 interface SuppliersFiltersProps {
   search?: string
@@ -34,9 +42,6 @@ export function SuppliersFilters({
   onClearFilters,
 }: SuppliersFiltersProps) {
   const hasActiveFilters = search || category || riskLevel || status
-  const categories = Object.values(SupplierCategory)
-  const riskLevels = Object.values(RiskLevel)
-  const statuses = Object.values(SupplierStatus)
 
   return (
     <div className="flex flex-col gap-4">
@@ -76,9 +81,9 @@ export function SuppliersFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All categories</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
+              {SUPPLIER_CATEGORIES.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {CATEGORY_LABELS[cat as SupplierCategory]}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -99,9 +104,9 @@ export function SuppliersFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All risk levels</SelectItem>
-              {riskLevels.map((level) => (
+              {RISK_LEVELS.map((level) => (
                 <SelectItem key={level} value={level}>
-                  {level}
+                  {RISK_LEVEL_LABELS[level as RiskLevel]}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -122,9 +127,9 @@ export function SuppliersFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All statuses</SelectItem>
-              {statuses.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {status}
+              {SUPPLIER_STATUSES.map((stat) => (
+                <SelectItem key={stat} value={stat}>
+                  {STATUS_LABELS[stat as SupplierStatus]}
                 </SelectItem>
               ))}
             </SelectContent>

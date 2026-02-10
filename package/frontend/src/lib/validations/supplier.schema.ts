@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { SupplierCategory, RiskLevel, SupplierStatus } from '@mindlapse/shared'
+import { SUPPLIER_CATEGORIES, RISK_LEVELS, SUPPLIER_STATUSES } from '@/lib/supplier-enums'
 
 export const createSupplierSchema = z.object({
   name: z
@@ -11,18 +11,17 @@ export const createSupplierSchema = z.object({
     .string()
     .min(1, 'Domain is required')
     .regex(/^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i, 'Invalid domain format (e.g., example.com)'),
-  category: z.enum(SupplierCategory, {
+  category: z.enum(SUPPLIER_CATEGORIES as [string, ...string[]], {
     message: 'Please select a valid category',
   }),
-  riskLevel: z.enum(RiskLevel, {
+  riskLevel: z.enum(RISK_LEVELS as [string, ...string[]], {
     message: 'Please select a valid risk level',
   }),
-  status: z.enum(SupplierStatus, {
+  status: z.enum(SUPPLIER_STATUSES as [string, ...string[]], {
     message: 'Please select a valid status',
   }),
   contractEndDate: z
     .string()
-    .nullable()
     .optional()
     .refine(
       (date) => {
@@ -32,7 +31,7 @@ export const createSupplierSchema = z.object({
       },
       { message: 'Invalid date format' }
     ),
-  notes: z.string().max(5000, 'Notes are too long (max 5000 characters)').nullable().optional(),
+  notes: z.string().max(5000, 'Notes are too long (max 5000 characters)').optional(),
 })
 
 export type CreateSupplierFormData = z.infer<typeof createSupplierSchema>
