@@ -30,6 +30,8 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     'supplier:read',
     'supplier:update',
     'supplier:delete',
+    'supplier:update_risk',
+    'supplier:add_notes',
     'audit:read',
     'risk_policy:configure',
   ],

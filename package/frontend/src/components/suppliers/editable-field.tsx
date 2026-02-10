@@ -15,7 +15,8 @@ import {
 } from '@/components/ui/select'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { useUpdateSupplier } from '@/hooks/mutations/use-suppliers'
-import { SupplierCategory, RiskLevel, SupplierStatus } from '@mindlapse/shared'
+import { usePermissions } from '@/hooks/use-permissions'
+import { SupplierCategory, RiskLevel, SupplierStatus, type Permission } from '@mindlapse/shared'
 import {
   SUPPLIER_CATEGORIES,
   RISK_LEVELS,
@@ -32,6 +33,7 @@ interface EditableFieldProps {
   supplierId: string
   type: 'text' | 'textarea' | 'date' | 'select'
   options?: 'category' | 'riskLevel' | 'status'
+  requiredPermission?: Permission
 }
 
 const SELECT_OPTIONS_CONFIG = {
@@ -59,9 +61,13 @@ export function EditableField({
   supplierId,
   type,
   options,
+  requiredPermission = 'supplier:update',
 }: EditableFieldProps) {
   const [isEditing, setIsEditing] = useState(false)
   const { mutate: updateSupplier, isPending } = useUpdateSupplier()
+  const { can } = usePermissions()
+
+  const canEdit = can(requiredPermission)
 
   const schema = z.object({
     [field]: z.string().optional(),
@@ -112,7 +118,7 @@ export function EditableField({
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium">{label}</label>
-        {!isEditing && (
+        {!isEditing && canEdit && (
           <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="h-8">
             <Edit2 className="h-3 w-3" />
           </Button>

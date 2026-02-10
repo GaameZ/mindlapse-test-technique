@@ -145,6 +145,7 @@ export function SupplierDetail({ supplierId }: SupplierDetailProps) {
                 supplierId={supplierId}
                 type="select"
                 options="riskLevel"
+                requiredPermission="supplier:update_risk"
               />
 
               <EditableField
@@ -170,6 +171,7 @@ export function SupplierDetail({ supplierId }: SupplierDetailProps) {
                 value={supplierData.notes}
                 supplierId={supplierId}
                 type="textarea"
+                requiredPermission="supplier:add_notes"
               />
             </CardContent>
           </Card>

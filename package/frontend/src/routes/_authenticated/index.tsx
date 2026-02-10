@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { SuppliersTable } from '@/components/suppliers/suppliers-table'
 import { CreateSupplierDialog } from '@/components/suppliers/create-supplier-dialog'
+import { usePermissions } from '@/hooks/use-permissions'
 import { z } from 'zod'
 import { SUPPLIER_CATEGORIES, RISK_LEVELS, SUPPLIER_STATUSES } from '@/lib/supplier-enums'
 
@@ -18,6 +19,8 @@ export const Route = createFileRoute('/_authenticated/')({
 })
 
 function RouteComponent() {
+  const { can } = usePermissions()
+
   return (
     <div className="flex flex-1 flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -27,7 +30,7 @@ function RouteComponent() {
             Manage your organization's suppliers and assess cyber risks
           </p>
         </div>
-        <CreateSupplierDialog />
+        {can('supplier:create') && <CreateSupplierDialog />}
       </div>
       <SuppliersTable />
     </div>

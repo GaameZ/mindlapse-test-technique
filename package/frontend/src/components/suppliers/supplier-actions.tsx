@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { useDeleteSupplier } from '@/hooks/mutations/use-suppliers'
+import { usePermissions } from '@/hooks/use-permissions'
 import type { Supplier } from '@mindlapse/shared'
 
 interface SupplierActionsProps {
@@ -23,6 +24,7 @@ interface SupplierActionsProps {
 export function SupplierActions({ supplier }: SupplierActionsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const { mutate: deleteSupplier, isPending } = useDeleteSupplier()
+  const { can } = usePermissions()
   const navigate = useNavigate()
 
   const handleDelete = () => {
@@ -34,6 +36,8 @@ export function SupplierActions({ supplier }: SupplierActionsProps) {
     })
   }
 
+  const canDelete = can('supplier:delete')
+
   return (
     <div className="flex items-center gap-2">
       <Link to="/suppliers/$supplierId" params={{ supplierId: supplier.id }}>
@@ -43,47 +47,51 @@ export function SupplierActions({ supplier }: SupplierActionsProps) {
         </Button>
       </Link>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setShowDeleteDialog(true)}
-        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-      >
-        <Trash2 />
-        <span className="sr-only">Delete</span>
-      </Button>
+      {canDelete && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowDeleteDialog(true)}
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+        >
+          <Trash2 />
+          <span className="sr-only">Delete</span>
+        </Button>
+      )}
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Supplier</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete <strong>{supplier.name}</strong>? This action cannot
-              be undone and will permanently remove this supplier from your organization.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault()
-                handleDelete()
-              }}
-              disabled={isPending}
-              variant="destructive"
-            >
-              {isPending ? (
-                <>
-                  <LoadingSpinner size="sm" className="mr-2" />
-                  Deleting...
-                </>
-              ) : (
-                'Delete'
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {canDelete && (
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Supplier</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete <strong>{supplier.name}</strong>? This action cannot
+                be undone and will permanently remove this supplier from your organization.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault()
+                  handleDelete()
+                }}
+                disabled={isPending}
+                variant="destructive"
+              >
+                {isPending ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete'
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   )
 }
