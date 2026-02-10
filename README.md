@@ -1,3 +1,69 @@
+# Mindlapse - Test technique
+
+## 🚀 Installation
+
+### 1. Copier le fichier d'environnement
+
+```bash
+cp .env.example .env
+```
+
+### 2. Générer les secrets
+
+```bash
+# Générer l'APP_KEY (AdonisJS)
+cd package/backend
+node ace generate:key
+
+# Générer un JWT_SECRET (aléatoire)
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+Copie ces valeurs dans ton `.env` :
+
+```bash
+APP_KEY=<la clé générée>
+JWT_SECRET=<le secret généré>
+```
+
+### 3. Configurer la base de données
+
+Édite `.env` et change les valeurs :
+
+```bash
+DB_USER=ton_user
+DB_PASSWORD=ton_password
+DB_DATABASE=ton_database
+```
+
+### 4. Lancer avec Docker
+
+```bash
+docker compose up --build
+```
+
+Les migrations et le seed sont exécutés automatiquement à chaque build pour le bien du test technique.
+
+Accéder à l'application :
+
+- **Frontend** : http://localhost:5173
+- **Backend API** : http://localhost:3333
+
+### Comptes de test (après seed)
+
+Le seeder crée 2 organisations avec 4 utilisateurs :
+
+| Email                   | Mot de passe   | Rôle    | Organisation  | Permissions                                                |
+| ----------------------- | -------------- | ------- | ------------- | ---------------------------------------------------------- |
+| `owner@acme.com`        | `Password123!` | Owner   | Acme Corp     | Toutes (gestion utilisateurs, suppression org, CRUD tout)  |
+| `admin@acme.com`        | `Password123!` | Admin   | Acme Corp     | CRUD fournisseurs, configuration, lecture audit log        |
+| `analyst@acme.com`      | `Password123!` | Analyst | Acme Corp     | Lecture fournisseurs, modification risk level, ajout notes |
+| `auditor@techstart.com` | `Password123!` | Auditor | TechStart Inc | Lecture seule sur tout, accès complet à l'audit trail      |
+
+**Note** : Les utilisateurs ne peuvent voir que les données de leur organisation (isolation multi-tenant stricte).
+
+---
+
 ## User Management - Vision Production
 
 ### Ajout d'Utilisateurs (Implémentation Actuelle vs. Production)

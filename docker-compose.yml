@@ -31,6 +31,72 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build:
+      context: .
+      dockerfile: package/backend/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      HOST: 0.0.0.0
+      DB_HOST: postgres
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - '${PORT:-3333}:3333'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./package/backend:/app/package/backend
+      - ./package/shared:/app/package/shared
+      - /app/node_modules
+      - /app/package/backend/node_modules
+      - /app/package/shared/node_modules
+
+  worker:
+    build:
+      context: .
+      dockerfile: package/ai-service/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./package/ai-service:/app/package/ai-service
+      - ./package/shared:/app/package/shared
+      - /app/node_modules
+      - /app/package/ai-service/node_modules
+      - /app/package/shared/node_modules
+
+  frontend:
+    build:
+      context: .
+      dockerfile: package/frontend/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend
+    volumes:
+      - ./package/frontend:/app/package/frontend
+      - ./package/shared:/app/package/shared
+      - /app/node_modules
+      - /app/package/frontend/node_modules
+      - /app/package/shared/node_modules
+
 volumes:
   pgdata:
   redisdata:
