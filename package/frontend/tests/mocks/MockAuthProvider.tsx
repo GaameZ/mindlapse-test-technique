@@ -39,6 +39,7 @@ export function MockAuthProvider({ children, user, isLoading = false }: MockAuth
   return <MockAuthContext.Provider value={value}>{children}</MockAuthContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useMockAuth(): MockAuthContextValue {
   const context = useContext(MockAuthContext)
   if (!context) {
@@ -47,6 +48,7 @@ export function useMockAuth(): MockAuthContextValue {
   return context
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function createMockUser(role: Role): MockUser {
   return {
     id: `test-user-${role}`,

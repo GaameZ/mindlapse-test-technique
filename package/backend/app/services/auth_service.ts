@@ -43,38 +43,6 @@ export default class AuthService {
     return jwt.verify(token, JWT_SECRET) as { userId: string }
   }
 
-  static async register(data: {
-    email: string
-    password: string
-    fullName: string
-    role: Role
-    organizationId: string
-  }): Promise<{ user: Omit<User, 'password_hash'>; tokens: Tokens }> {
-    const passwordHash = await this.hashPassword(data.password)
-
-    const user = await db
-      .insertInto('users')
-      .values({
-        email: data.email,
-        password_hash: passwordHash,
-        full_name: data.fullName,
-        role: data.role,
-        organization_id: data.organizationId,
-      })
-      .returningAll()
-      .executeTakeFirstOrThrow()
-
-    const tokens = this.generateTokens({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-      organizationId: user.organization_id,
-    })
-
-    const { password_hash: _, ...safeUser } = user
-    return { user: safeUser, tokens }
-  }
-
   static async login(
     email: string,
     password: string
@@ -101,7 +69,14 @@ export default class AuthService {
       organizationId: user.organization_id,
     })
 
-    const { password_hash: _, ...safeUser } = user
+    const safeUser = {
+      id: user.id,
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role,
+      organization_id: user.organization_id,
+      created_at: user.created_at,
+    }
     return { user: safeUser, tokens }
   }
 
@@ -135,7 +110,13 @@ export default class AuthService {
 
     if (!user) return undefined
 
-    const { password_hash: _, ...safeUser } = user
-    return safeUser
+    return {
+      id: user.id,
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role,
+      organization_id: user.organization_id,
+      created_at: user.created_at,
+    }
   }
 }

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { Migrator, FileMigrationProvider } from 'kysely'
 import db from '../config/database.js'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const currentDirname = path.dirname(fileURLToPath(import.meta.url))
 
 async function migrateToLatest() {
   const migrator = new Migrator({
@@ -12,7 +12,7 @@ async function migrateToLatest() {
     provider: new FileMigrationProvider({
       fs,
       path,
-      migrationFolder: path.join(__dirname, 'migrations'),
+      migrationFolder: path.join(currentDirname, 'migrations'),
     }),
   })
 

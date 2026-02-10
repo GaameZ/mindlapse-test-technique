@@ -3,8 +3,8 @@ import { Env } from '@adonisjs/core/env'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const monorepoRoot = path.resolve(__dirname, '../../../')
+const currentDirname = path.dirname(fileURLToPath(import.meta.url))
+const monorepoRoot = path.resolve(currentDirname, '../../../')
 
 export default await Env.create(new URL(monorepoRoot + '/', import.meta.url), {
   NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),

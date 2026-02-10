@@ -212,19 +212,53 @@ const suppliers = await db
 
 ---
 
-## Vulnérabilités (npm audit)
+## CI Github Actions
 
-**État** : ⚠️ Audit manuel (pas de CI)
+### Audit Automatique (GitHub Actions)
 
-**Politique** :
+**CI complète** exécutée sur chaque push et PR :
 
-- 🔴 Critical : Fix < 24h
-- 🟠 High : Fix < 7j
-- 🟡 Moderate : Fix < 30j
+1. **Lint** : ESLint sur tous les packages (frontend, backend, shared)
+2. **Tests** : Tests unitaires et d'intégration avec PostgreSQL et Redis
+3. **pnpm audit** : Détecte les vulnérabilités dans les dépendances (niveau moderate+)
 
-**Commande** : `pnpm audit`
+**Workflow CI** :
 
-**Roadmap** : GitHub Actions + Dependabot
+```yaml
+# .github/workflows/ci.yml
+jobs:
+  lint:
+    - ESLint sur tous les packages
+
+  test:
+    - Tests unitaires (shared, frontend, backend)
+    - Tests d'intégration (avec PostgreSQL + Redis)
+
+  audit:
+    - pnpm audit --audit-level=moderate
+```
+
+### Commandes Manuelles
+
+```bash
+# Audit complet
+pnpm audit
+
+# Audit avec niveau de sévérité
+pnpm audit --audit-level=high
+
+# Fix automatique des vulnérabilités (si possible)
+pnpm audit --fix
+```
+
+### Politique de Gestion des Vulnérabilités
+
+| Sévérité | SLA de Correction | Action                                    |
+| -------- | ----------------- | ----------------------------------------- |
+| Critical | < 24h             | Hotfix immédiat, déploiement d'urgence    |
+| High     | < 7 jours         | Fix prioritaire, inclus dans next release |
+| Medium   | < 30 jours        | Fix planifié                              |
+| Low      | Best effort       | Fix opportuniste lors de refactoring      |
 
 ---
 
@@ -282,4 +316,4 @@ Le pipeline IA est protégé contre les abus :
 | **Headers**             | ✅     | Helmet (7 headers)                      |
 | **Multi-tenant**        | ✅     | Scoping + 5 tests                       |
 | **Audit trail**         | ✅     | Append-only + FK RESTRICT               |
-| **npm audit**           | ⚠️     | Manuel (CI TODO)                        |
+| **npm audit**           | ✅     | CI automatisée (GitHub Actions)         |

@@ -62,37 +62,9 @@ test.group('Auth API', (group) => {
     await cleanupAll()
   })
 
-  test('POST /api/v1/auth/register — creates org + user', async ({ client, assert }) => {
-    const response = await client.post('/api/v1/auth/register').json({
-      email: 'owner@testauth.com',
-      password: 'Password123!',
-      fullName: 'Auth Owner',
-      organizationName: 'Auth Test Org',
-    })
-
-    response.assertStatus(201)
-
-    const body = response.body()
-    assert.isDefined(body.data.tokens.accessToken)
-    assert.isDefined(body.data.tokens.refreshToken)
-    // Sécurité : Le register ne retourne que les tokens, pas les données utilisateur
-    assert.isUndefined(body.data.user)
-  })
-
-  test('POST /api/v1/auth/register — rejects duplicate email', async ({ client }) => {
-    const response = await client.post('/api/v1/auth/register').json({
-      email: 'owner@testauth.com',
-      password: 'Password123!',
-      fullName: 'Auth Owner 2',
-      organizationName: 'Auth Test Org 2',
-    })
-
-    response.assertStatus(409)
-  })
-
   test('POST /api/v1/auth/login — valid credentials', async ({ client, assert }) => {
     const response = await client.post('/api/v1/auth/login').json({
-      email: 'owner@testauth.com',
+      email: 'owner@acme.com',
       password: 'Password123!',
     })
 
@@ -132,7 +104,7 @@ test.group('Auth API', (group) => {
   test('GET /api/v1/auth/me — returns authenticated user', async ({ client }) => {
     const loginRes = await client
       .post('/api/v1/auth/login')
-      .json({ email: 'owner@testauth.com', password: 'Password123!' })
+      .json({ email: 'owner@acme.com', password: 'Password123!' })
 
     const token = loginRes.body().data.tokens.accessToken
 
@@ -140,7 +112,7 @@ test.group('Auth API', (group) => {
 
     response.assertStatus(200)
     response.assertBodyContains({
-      data: { user: { email: 'owner@testauth.com' } },
+      data: { user: { email: 'owner@acme.com' } },
     })
   })
 
@@ -564,26 +536,6 @@ test.group('Input Validation', (group) => {
 
   group.teardown(async () => {
     await cleanupAll()
-  })
-
-  test('Register rejects invalid email', async ({ client }) => {
-    const response = await client.post('/api/v1/auth/register').json({
-      email: 'not-an-email',
-      password: 'Password123!',
-      fullName: 'Bad Email',
-    })
-
-    response.assertStatus(422)
-  })
-
-  test('Register rejects short password', async ({ client }) => {
-    const response = await client.post('/api/v1/auth/register').json({
-      email: 'shortpw@test.com',
-      password: 'short',
-      fullName: 'Short PW',
-    })
-
-    response.assertStatus(422)
   })
 
   test('Create supplier rejects invalid risk level', async ({ client }) => {

@@ -60,8 +60,8 @@ export function SupplierAuditLogs({ supplierId }: SupplierAuditLogsProps) {
                       View changes
                     </summary>
                     <div className="mt-2 flex flex-col gap-1">
-                      {Object.entries(log.after as Record<string, any>).map(([key, value]) => {
-                        const beforeValue = (log.before as Record<string, any>)?.[key]
+                      {Object.entries(log.after as Record<string, unknown>).map(([key, value]) => {
+                        const beforeValue = (log.before as Record<string, unknown>)?.[key]
                         if (beforeValue === value) return null
 
                         return (

@@ -1,80 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AuthService from '#services/auth_service'
-import {
-  registerValidator,
-  loginValidator,
-  refreshTokenValidator,
-} from '#validators/auth_validator'
-import { Role } from '@mindlapse/shared'
-import db from '#config/database'
+import { loginValidator, refreshTokenValidator } from '#validators/auth_validator'
 
 export default class AuthController {
-  /**
-   * POST /api/v1/auth/register
-   * Ce register est uniquement conçu pour les bien du test technique.
-   * En production, il faudrait un espace administrateur pour permettre la création d'un premier utilisateur
-   */
-  async register(ctx: HttpContext): Promise<void> {
-    const payload = await ctx.request.validateUsing(registerValidator)
-
-    // Vérifier que l'email n'est pas déjà utilisé
-    const existing = await db
-      .selectFrom('users')
-      .select('id')
-      .where('email', '=', payload.email)
-      .executeTakeFirst()
-
-    if (existing) {
-      ctx.response.conflict({
-        error: 'CONFLICT',
-        message: 'A user with this email already exists',
-      })
-      return
-    }
-
-    let organizationId: string
-
-    if (payload.organizationId) {
-      const org = await db
-        .selectFrom('organizations')
-        .select('id')
-        .where('id', '=', payload.organizationId)
-        .executeTakeFirst()
-
-      if (!org) {
-        ctx.response.notFound({
-          error: 'NOT_FOUND',
-          message: 'Organization not found',
-        })
-        return
-      }
-      organizationId = org.id
-    } else {
-      const orgName = payload.organizationName ?? `${payload.fullName}'s Organization`
-      const org = await db
-        .insertInto('organizations')
-        .values({ name: orgName })
-        .returning('id')
-        .executeTakeFirstOrThrow()
-
-      organizationId = org.id
-    }
-
-    const result = await AuthService.register({
-      email: payload.email,
-      password: payload.password,
-      fullName: payload.fullName,
-      role: payload.organizationId ? Role.ANALYST : Role.OWNER,
-      organizationId,
-    })
-
-    ctx.response.created({
-      data: {
-        tokens: result.tokens,
-      },
-    })
-  }
-
   /**
    * POST /api/v1/auth/login
    */

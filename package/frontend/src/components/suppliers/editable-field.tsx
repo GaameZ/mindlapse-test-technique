@@ -154,10 +154,11 @@ export function EditableField({
 
   const currentValue = watch(field)
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: Record<string, string | undefined>) => {
     const newValue = data[field] || undefined
 
     if (field === 'riskLevel') {
+      if (!newValue) return
       updateRiskLevel(
         { id: supplierId, riskLevel: newValue },
         {
