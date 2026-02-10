@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect, useRouter } from '@tanstack/react-ro
 import { useAuth } from '@/contexts/AuthContext'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { useEffect } from 'react'
 
 export const Route = createFileRoute('/_authenticated')({
@@ -39,7 +40,7 @@ function AuthenticatedLayoutComponent() {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-muted-foreground">Loading...</div>
+        <LoadingSpinner size="lg" />
       </div>
     )
   }

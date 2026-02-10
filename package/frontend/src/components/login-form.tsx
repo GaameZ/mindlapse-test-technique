@@ -6,6 +6,7 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { FormError } from '@/components/ui/form-error'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { useLogin } from '@/hooks'
 import { loginSchema, type LoginFormData } from '@/lib/validations'
 
@@ -69,7 +70,14 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
               </Field>
 
               <Button type="submit" className="w-full" disabled={isPending} aria-busy={isPending}>
-                {isPending ? 'Logging in...' : 'Login'}
+                {isPending ? (
+                  <span className="flex items-center gap-2">
+                    <LoadingSpinner size="sm" variant="inverted" />
+                    Logging in...
+                  </span>
+                ) : (
+                  'Login'
+                )}
               </Button>
             </FieldGroup>
           </form>

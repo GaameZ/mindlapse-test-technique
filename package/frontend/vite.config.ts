@@ -20,4 +20,25 @@ export default defineConfig({
     },
   },
   envDir: path.resolve(__dirname, '../..'),
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'router-vendor': ['@tanstack/react-router'],
+          'query-vendor': ['@tanstack/react-query'],
+          'ui-vendor': ['sonner', 'react-hook-form', 'zod'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+    minify: 'esbuild',
+    sourcemap: false,
+  },
+
+  server: {
+    warmup: {
+      clientFiles: ['./src/main.tsx', './src/routes/**/*.tsx'],
+    },
+  },
 })
