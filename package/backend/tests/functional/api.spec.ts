@@ -58,6 +58,14 @@ async function cleanupAll(): Promise<void> {
 |--------------------------------------------------------------------------
 */
 test.group('Auth API', (group) => {
+  let authOrgId: string
+
+  group.setup(async () => {
+    authOrgId = await createTestOrg('Auth Test Org')
+    await createTestUser(authOrgId, 'owner@acme.com', Role.OWNER, 'Password123!')
+    await createTestUser(authOrgId, 'owner@testauth.com', Role.OWNER, 'Password123!')
+  })
+
   group.teardown(async () => {
     await cleanupAll()
   })
