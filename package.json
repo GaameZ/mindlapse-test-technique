@@ -4,6 +4,10 @@
   "version": "1.0.0",
   "description": "Cyber Risk Intelligence Platform – Monorepo pnpm workspace",
   "packageManager": "pnpm@10.28.0",
+  "author": {
+    "name": "Alexy SAMYN",
+    "email": "alexy59430@gmail.com"
+  },
   "engines": {
     "node": ">=22.0.0",
     "pnpm": ">=10.0.0"
