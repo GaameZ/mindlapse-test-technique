@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { SUPPLIER_CATEGORIES, RISK_LEVELS, SUPPLIER_STATUSES } from '@/lib/supplier-enums'
+import { NOTES_REGEX, NOTES_MAX_LENGTH } from '@mindlapse/shared'
 
 export const createSupplierSchema = z.object({
   name: z
@@ -31,7 +32,11 @@ export const createSupplierSchema = z.object({
       },
       { message: 'Invalid date format' }
     ),
-  notes: z.string().max(5000, 'Notes are too long (max 5000 characters)').optional(),
+  notes: z
+    .string()
+    .max(NOTES_MAX_LENGTH, `Notes are too long (max ${NOTES_MAX_LENGTH} characters)`)
+    .regex(NOTES_REGEX, 'Notes contain invalid characters')
+    .optional(),
 })
 
 export type CreateSupplierFormData = z.infer<typeof createSupplierSchema>

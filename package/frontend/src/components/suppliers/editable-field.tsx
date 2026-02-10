@@ -14,9 +14,20 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { useUpdateSupplier } from '@/hooks/mutations/use-suppliers'
+import {
+  useUpdateSupplier,
+  useUpdateSupplierRiskLevel,
+  useUpdateSupplierNotes,
+} from '@/hooks/mutations/use-suppliers'
 import { usePermissions } from '@/hooks/use-permissions'
-import { SupplierCategory, RiskLevel, SupplierStatus, type Permission } from '@mindlapse/shared'
+import {
+  SupplierCategory,
+  RiskLevel,
+  SupplierStatus,
+  type Permission,
+  NOTES_REGEX,
+  NOTES_MAX_LENGTH,
+} from '@mindlapse/shared'
 import {
   SUPPLIER_CATEGORIES,
   RISK_LEVELS,
@@ -64,16 +75,76 @@ export function EditableField({
   requiredPermission = 'supplier:update',
 }: EditableFieldProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const { mutate: updateSupplier, isPending } = useUpdateSupplier()
+
+  const { mutate: updateSupplier, isPending: isUpdatingSupplier } = useUpdateSupplier()
+  const { mutate: updateRiskLevel, isPending: isUpdatingRiskLevel } = useUpdateSupplierRiskLevel()
+  const { mutate: updateNotes, isPending: isUpdatingNotes } = useUpdateSupplierNotes()
+
   const { can } = usePermissions()
 
   const canEdit = can(requiredPermission)
 
+  // Déterminer quelle mutation et quel isPending utiliser
+  const isPending =
+    field === 'riskLevel'
+      ? isUpdatingRiskLevel
+      : field === 'notes'
+        ? isUpdatingNotes
+        : isUpdatingSupplier
+
+  const getFieldSchema = () => {
+    const requiredFields = ['name', 'domain', 'category', 'riskLevel', 'status']
+    const isRequired = requiredFields.includes(field)
+
+    if (field === 'notes') {
+      return z
+        .string()
+        .max(NOTES_MAX_LENGTH, `Notes are too long (max ${NOTES_MAX_LENGTH} characters)`)
+        .regex(
+          NOTES_REGEX,
+          'Notes contain forbidden characters. HTML tags (< >) and some special characters are not allowed for security reasons.'
+        )
+        .optional()
+    }
+
+    if (field === 'domain') {
+      const domainSchema = z
+        .string()
+        .regex(
+          /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i,
+          'Invalid domain format (e.g., example.com)'
+        )
+
+      return isRequired ? domainSchema.min(1, 'Domain is required') : domainSchema.optional()
+    }
+
+    if (field === 'name') {
+      return z
+        .string()
+        .min(1, 'Supplier name is required')
+        .min(2, 'Supplier name must be at least 2 characters')
+        .max(255, 'Supplier name is too long')
+    }
+
+    if (isRequired) {
+      return z.string().min(1, `${label} is required`)
+    }
+
+    return z.string().optional()
+  }
+
   const schema = z.object({
-    [field]: z.string().optional(),
+    [field]: getFieldSchema(),
   })
 
-  const { register, handleSubmit, setValue, watch, reset } = useForm({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       [field]: value || '',
@@ -83,19 +154,41 @@ export function EditableField({
   const currentValue = watch(field)
 
   const onSubmit = (data: any) => {
-    updateSupplier(
-      {
-        id: supplierId,
-        data: {
-          [field]: data[field] || undefined,
+    const newValue = data[field] || undefined
+
+    if (field === 'riskLevel') {
+      updateRiskLevel(
+        { id: supplierId, riskLevel: newValue },
+        {
+          onSuccess: () => {
+            setIsEditing(false)
+          },
+        }
+      )
+    } else if (field === 'notes') {
+      updateNotes(
+        { id: supplierId, notes: newValue || '' },
+        {
+          onSuccess: () => {
+            setIsEditing(false)
+          },
+        }
+      )
+    } else {
+      updateSupplier(
+        {
+          id: supplierId,
+          data: {
+            [field]: newValue,
+          },
         },
-      },
-      {
-        onSuccess: () => {
-          setIsEditing(false)
-        },
-      }
-    )
+        {
+          onSuccess: () => {
+            setIsEditing(false)
+          },
+        }
+      )
+    }
   }
 
   const handleCancel = () => {
@@ -130,28 +223,54 @@ export function EditableField({
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
           {type === 'text' && (
-            <Input {...register(field)} placeholder={`Enter ${label.toLowerCase()}`} />
+            <>
+              <Input {...register(field)} placeholder={`Enter ${label.toLowerCase()}`} />
+              {errors[field] && (
+                <p className="text-sm text-destructive">{errors[field]?.message as string}</p>
+              )}
+            </>
           )}
 
           {type === 'textarea' && (
-            <Textarea {...register(field)} rows={4} placeholder={`Enter ${label.toLowerCase()}`} />
+            <>
+              <Textarea
+                {...register(field)}
+                rows={4}
+                placeholder={`Enter ${label.toLowerCase()}`}
+              />
+              {errors[field] && (
+                <p className="text-sm text-destructive">{errors[field]?.message as string}</p>
+              )}
+            </>
           )}
 
-          {type === 'date' && <Input {...register(field)} type="date" />}
+          {type === 'date' && (
+            <>
+              <Input {...register(field)} type="date" />
+              {errors[field] && (
+                <p className="text-sm text-destructive">{errors[field]?.message as string}</p>
+              )}
+            </>
+          )}
 
           {type === 'select' && options && (
-            <Select value={currentValue} onValueChange={(val) => setValue(field, val)}>
-              <SelectTrigger>
-                <SelectValue placeholder={SELECT_OPTIONS_CONFIG[options].placeholder} />
-              </SelectTrigger>
-              <SelectContent>
-                {SELECT_OPTIONS_CONFIG[options].values.map((optionValue) => (
-                  <SelectItem key={optionValue} value={optionValue}>
-                    {SELECT_OPTIONS_CONFIG[options].labels[optionValue]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <>
+              <Select value={currentValue} onValueChange={(val) => setValue(field, val)}>
+                <SelectTrigger>
+                  <SelectValue placeholder={SELECT_OPTIONS_CONFIG[options].placeholder} />
+                </SelectTrigger>
+                <SelectContent>
+                  {SELECT_OPTIONS_CONFIG[options].values.map((optionValue) => (
+                    <SelectItem key={optionValue} value={optionValue}>
+                      {SELECT_OPTIONS_CONFIG[options].labels[optionValue]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors[field] && (
+                <p className="text-sm text-destructive">{errors[field]?.message as string}</p>
+              )}
+            </>
           )}
 
           <div className="flex gap-2">

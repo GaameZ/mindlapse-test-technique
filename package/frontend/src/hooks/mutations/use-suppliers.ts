@@ -44,6 +44,50 @@ export function useUpdateSupplier() {
   })
 }
 
+export function useUpdateSupplierRiskLevel() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, riskLevel }: { id: string; riskLevel: string }) =>
+      apiClient.updateSupplierRiskLevel(id, riskLevel),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] })
+      queryClient.invalidateQueries({ queryKey: ['suppliers', variables.id] })
+      queryClient.invalidateQueries({ queryKey: ['suppliers', variables.id, 'audit-logs'] })
+      toast.success('Risk level updated', {
+        description: 'The risk level has been successfully updated',
+      })
+    },
+    onError: (error) => {
+      toast.error('Failed to update risk level', {
+        description: error.message,
+      })
+    },
+  })
+}
+
+export function useUpdateSupplierNotes() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, notes }: { id: string; notes: string }) =>
+      apiClient.updateSupplierNotes(id, notes),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] })
+      queryClient.invalidateQueries({ queryKey: ['suppliers', variables.id] })
+      queryClient.invalidateQueries({ queryKey: ['suppliers', variables.id, 'audit-logs'] })
+      toast.success('Notes updated', {
+        description: 'The notes have been successfully updated',
+      })
+    },
+    onError: (error) => {
+      toast.error('Failed to update notes', {
+        description: error.message,
+      })
+    },
+  })
+}
+
 export function useDeleteSupplier() {
   const queryClient = useQueryClient()
 

@@ -1,6 +1,6 @@
 import db from '#config/database'
 import AuthService from '#services/auth_service'
-import { Role, SupplierCategory, RiskLevel, SupplierStatus } from '@mindlapse/shared'
+import { Role, SupplierCategory, RiskLevel, SupplierStatus, AuditAction } from '@mindlapse/shared'
 import { randomUUID } from 'node:crypto'
 
 export default class DevSeeder {
@@ -9,6 +9,7 @@ export default class DevSeeder {
 
     // Nettoyer les données existantes
     console.log('🧹 Cleaning existing data...')
+    await db.deleteFrom('audit_logs').execute()
     await db.deleteFrom('suppliers').execute()
     await db.deleteFrom('users').execute()
     await db.deleteFrom('organizations').execute()
@@ -375,11 +376,45 @@ export default class DevSeeder {
     )
     console.log('   - Risk levels: Critical (2), High (1), Medium (5), Low (7)')
 
+    // ========================================
+    // 4. Créer des audit logs (pour démo)
+    // ========================================
+    console.log('📋 Creating audit logs...')
+
+    // Créer un audit log CREATE pour chaque supplier
+    const auditLogs = suppliers.map((supplier, index) => {
+      // Déterminer quel user a créé le supplier (rotation Owner/Admin)
+      const creatorUser = index % 2 === 0 ? users[0] : users[1] // Owner ou Admin
+
+      return {
+        id: randomUUID(),
+        user_id: creatorUser.id,
+        action: AuditAction.CREATE,
+        entity_type: 'supplier',
+        entity_id: supplier.id,
+        before: null,
+        after: JSON.stringify({
+          name: supplier.name,
+          domain: supplier.domain,
+          category: supplier.category,
+          risk_level: supplier.risk_level,
+          status: supplier.status,
+        }),
+        ip_address: `192.168.1.${10 + (index % 5)}`,
+        created_at: new Date(Date.now() - (30 - index * 2) * 24 * 60 * 60 * 1000).toISOString(),
+      }
+    })
+
+    await db.insertInto('audit_logs').values(auditLogs).execute()
+
+    console.log(`✅ Created ${auditLogs.length} audit log entries`)
+
     console.log('\n🎉 Dev seeder completed successfully!')
     console.log('\n📋 Summary:')
     console.log('   - 2 organizations')
     console.log('   - 4 users (1 per role)')
     console.log(`   - ${suppliers.length} suppliers`)
+    console.log(`   - ${auditLogs.length} audit log entries`)
     console.log(`   - Password for all accounts: ${commonPassword}`)
     console.log('\n🔐 Login credentials:')
     console.log('   - owner@acme.com / Password123!')

@@ -107,6 +107,20 @@ class ApiClient {
     })
   }
 
+  async updateSupplierRiskLevel(id: string, riskLevel: string): Promise<SupplierResponse> {
+    return this.request<SupplierResponse>(`/api/v1/suppliers/${id}/risk-level`, {
+      method: 'PATCH',
+      body: JSON.stringify({ riskLevel }),
+    })
+  }
+
+  async updateSupplierNotes(id: string, notes: string): Promise<SupplierResponse> {
+    return this.request<SupplierResponse>(`/api/v1/suppliers/${id}/notes`, {
+      method: 'PATCH',
+      body: JSON.stringify({ notes }),
+    })
+  }
+
   async deleteSupplier(id: string): Promise<void> {
     return this.request<void>(`/api/v1/suppliers/${id}`, {
       method: 'DELETE',

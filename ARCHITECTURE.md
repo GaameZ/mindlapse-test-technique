@@ -115,22 +115,54 @@ function SupplierActions({ supplier }) {
 }
 ```
 
+### Implémentation Backend
+
+#### Routes Granulaires
+
+Le backend expose des endpoints spécifiques pour les permissions granulaires :
+
+**Routes API** :
+
+```typescript
+// Route générale (nécessite supplier:update)
+PUT /api/v1/suppliers/:id
+  Permissions: supplier:update (Admin, Owner)
+
+// Routes granulaires (permissions spécifiques)
+PATCH /api/v1/suppliers/:id/risk-level
+  Permissions: supplier:update_risk (Analyst, Admin, Owner)
+
+PATCH /api/v1/suppliers/:id/notes
+  Permissions: supplier:add_notes (Analyst, Admin, Owner)
+```
+
+**Avantages** :
+
+- ✅ Un Analyst peut modifier le risk level et les notes via les routes PATCH
+- ✅ Un Analyst ne peut PAS modifier les autres champs (pas d'accès à PUT)
+- ✅ Audit trail séparé pour chaque type de modification
+- ✅ Principe du moindre privilège respecté
+
+**Middleware RBAC** :
+
+```typescript
+// start/routes.ts
+router
+  .patch('/:id/risk-level', [SuppliersController, 'updateRiskLevel'])
+  .use(middleware.rbac({ permission: 'supplier:update_risk' }))
+  .use(middleware.audit())
+```
+
+**Frontend** :
+
+Le composant `EditableField` détecte automatiquement le champ et utilise la bonne route
+
 ### Isolation Multi-Tenant
 
 Chaque requête est automatiquement scopée par `organization_id` :
 
 - Un utilisateur ne peut accéder qu'aux données de son organisation
 - Vérification double : applicatif + base de données
-- Fonction `canAccessResource(userOrgId, resourceOrgId)` pour validation
-
-**Backend (middleware)** :
-
-```typescript
-// Vérification systématique de l'appartenance à l'organisation
-if (!canAccessResource(user.organizationId, resource.organizationId)) {
-  throw new ForbiddenException()
-}
-```
 
 ### Règles de Sécurité
 
@@ -138,6 +170,7 @@ if (!canAccessResource(user.organizationId, resource.organizationId)) {
 2. **Vérification côté serveur obligatoire** : Les permissions frontend sont pour l'UX, la vraie sécurité est au backend
 3. **Audit systématique** : Toute action sensible est loggée dans `audit_logs`
 4. **Principe du moindre privilège** : Chaque rôle a le minimum de permissions nécessaires
+5. **Routes granulaires** : Préférer des routes spécifiques (PATCH) aux routes générales (PUT) pour un contrôle fin
 
 ### Tests de Permissions
 
@@ -147,6 +180,7 @@ Les tests doivent vérifier :
 - ✅ Un utilisateur sans permission ne peut PAS effectuer l'action
 - ✅ Un utilisateur d'une autre organisation ne peut PAS accéder aux ressources
 - ✅ Les boutons/champs sont cachés selon les permissions
+- ✅ Les routes granulaires (PATCH) respectent leurs permissions spécifiques
 
 ---
 

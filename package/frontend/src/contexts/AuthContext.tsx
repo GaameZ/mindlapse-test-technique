@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { apiClient } from '@/lib/api/client'
 import { authStorage } from '@/lib/auth-storage'
+import { queryClient } from '@/lib/query-client'
 import type { User } from '@mindlapse/shared'
 
 interface AuthContextValue {
@@ -65,6 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const login = async (email: string, password: string): Promise<void> => {
+    queryClient.clear()
+
     const response = await apiClient.login({ email, password })
     const tokens = response.data.tokens
     authStorage.setTokens(tokens.accessToken, tokens.refreshToken)
@@ -75,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = (): void => {
     authStorage.clearTokens()
     setUser(null)
+    queryClient.clear()
   }
 
   const refreshAuth = async (): Promise<void> => {

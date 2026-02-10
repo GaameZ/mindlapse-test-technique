@@ -43,6 +43,16 @@ router
           .use(middleware.audit())
 
         router
+          .patch('/:id/risk-level', [SuppliersController, 'updateRiskLevel'])
+          .use(middleware.rbac({ permission: 'supplier:update_risk' }))
+          .use(middleware.audit())
+
+        router
+          .patch('/:id/notes', [SuppliersController, 'updateNotes'])
+          .use(middleware.rbac({ permission: 'supplier:add_notes' }))
+          .use(middleware.audit())
+
+        router
           .delete('/:id', [SuppliersController, 'destroy'])
           .use(middleware.rbac({ permission: 'supplier:delete' }))
           .use(middleware.audit())

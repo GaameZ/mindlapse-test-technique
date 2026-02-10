@@ -9,6 +9,8 @@ import {
   updateSupplierValidator,
   listSuppliersValidator,
   supplierIdValidator,
+  updateRiskLevelValidator,
+  updateNotesValidator,
 } from '#validators/supplier_validator'
 import { listAuditLogsValidator } from '#validators/audit_log_validator'
 
@@ -209,6 +211,78 @@ export default class SuppliersController {
       .execute()
 
     ctx.response.ok({ message: 'Supplier deleted successfully' })
+  }
+
+  /**
+   * PATCH /api/v1/suppliers/:id/risk-level
+   * Mise à jour du niveau de risque uniquement.
+   * Accessible avec la permission supplier:update_risk (Analyst, Admin, Owner).
+   */
+  async updateRiskLevel(ctx: HttpContext): Promise<void> {
+    const user = getAuthUser(ctx)
+    const { id } = await supplierIdValidator.validate(ctx.params)
+    const { riskLevel } = await ctx.request.validateUsing(updateRiskLevelValidator)
+
+    const supplier = await db
+      .selectFrom('suppliers')
+      .selectAll()
+      .where('id', '=', id)
+      .where('organization_id', '=', user.organizationId)
+      .executeTakeFirst()
+
+    if (!supplier) {
+      ctx.response.notFound({
+        error: 'NOT_FOUND',
+        message: 'Supplier not found',
+      })
+      return
+    }
+
+    const updated = await db
+      .updateTable('suppliers')
+      .set({ risk_level: riskLevel as RiskLevel })
+      .where('id', '=', id)
+      .where('organization_id', '=', user.organizationId)
+      .returningAll()
+      .executeTakeFirstOrThrow()
+
+    ctx.response.ok({ data: this.formatSupplier(updated) })
+  }
+
+  /**
+   * PATCH /api/v1/suppliers/:id/notes
+   * Mise à jour des notes uniquement.
+   * Accessible avec la permission supplier:add_notes (Analyst, Admin, Owner).
+   */
+  async updateNotes(ctx: HttpContext): Promise<void> {
+    const user = getAuthUser(ctx)
+    const { id } = await supplierIdValidator.validate(ctx.params)
+    const { notes } = await ctx.request.validateUsing(updateNotesValidator)
+
+    const supplier = await db
+      .selectFrom('suppliers')
+      .selectAll()
+      .where('id', '=', id)
+      .where('organization_id', '=', user.organizationId)
+      .executeTakeFirst()
+
+    if (!supplier) {
+      ctx.response.notFound({
+        error: 'NOT_FOUND',
+        message: 'Supplier not found',
+      })
+      return
+    }
+
+    const updated = await db
+      .updateTable('suppliers')
+      .set({ notes })
+      .where('id', '=', id)
+      .where('organization_id', '=', user.organizationId)
+      .returningAll()
+      .executeTakeFirstOrThrow()
+
+    ctx.response.ok({ data: this.formatSupplier(updated) })
   }
 
   /**

@@ -18,6 +18,7 @@ import { useSupplier } from '@/hooks/queries/use-suppliers'
 import { useDeleteSupplier } from '@/hooks/mutations/use-suppliers'
 import { EditableField } from '@/components/suppliers/editable-field'
 import { SupplierAuditLogs } from '@/components/suppliers/supplier-audit-logs'
+import { usePermissions } from '@/hooks/use-permissions'
 
 interface SupplierDetailProps {
   supplierId: string
@@ -25,6 +26,7 @@ interface SupplierDetailProps {
 
 export function SupplierDetail({ supplierId }: SupplierDetailProps) {
   const navigate = useNavigate()
+  const { can } = usePermissions()
   const { data: supplier, isLoading, error } = useSupplier(supplierId)
   const { mutate: deleteSupplier, isPending } = useDeleteSupplier()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -72,15 +74,12 @@ export function SupplierDetail({ supplierId }: SupplierDetailProps) {
             <p className="text-muted-foreground">{supplierData.domain}</p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowDeleteDialog(true)}
-          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete
-        </Button>
+        {can('supplier:delete') && (
+          <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)}>
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+          </Button>
+        )}
       </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -108,8 +107,8 @@ export function SupplierDetail({ supplierId }: SupplierDetailProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="flex flex-row gap-4 w-full flex-wrap">
+        <div className="flex-1 flex flex-col gap-4">
           <Card>
             <CardHeader>
               <CardTitle>Supplier Information</CardTitle>
@@ -203,9 +202,11 @@ export function SupplierDetail({ supplierId }: SupplierDetailProps) {
             </CardContent>
           </Card>
         </div>
-        <div className="lg:col-span-1">
-          <SupplierAuditLogs supplierId={supplierId} />
-        </div>
+        {can('audit:read') && (
+          <div className="w-full md:w-2xs">
+            <SupplierAuditLogs supplierId={supplierId} />
+          </div>
+        )}
       </div>
     </div>
   )
