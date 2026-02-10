@@ -1,10 +1,13 @@
-import { ChevronsUpDown, LogOut } from 'lucide-react'
+import { ChevronsUpDown, LogOut, Moon, Sun, Monitor } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
@@ -14,6 +17,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { useLogout } from '@/hooks'
+import { useTheme } from '@/providers/ThemeProvider'
 
 export function NavUser({
   user,
@@ -25,10 +29,19 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const { mutate: logout } = useLogout()
+  const { theme, setTheme } = useTheme()
 
   const handleLogout = () => {
     logout({ redirectTo: '/login' })
   }
+
+  const themes = [
+    { value: 'light' as const, label: 'Light', icon: Sun },
+    { value: 'dark' as const, label: 'Dark', icon: Moon },
+    { value: 'system' as const, label: 'System', icon: Monitor },
+  ]
+
+  const CurrentThemeIcon = themes.find((t) => t.value === theme)?.icon || Monitor
 
   return (
     <SidebarMenu>
@@ -60,6 +73,21 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <CurrentThemeIcon className="size-4" />
+                <span>Theme</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                {themes.map(({ value, label, icon: Icon }) => (
+                  <DropdownMenuItem key={value} onClick={() => setTheme(value)}>
+                    <Icon className="size-4" />
+                    <span>{label}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleLogout()}>
               <LogOut />
