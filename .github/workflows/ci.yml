@@ -89,7 +89,11 @@ jobs:
           DB_USER: mindlapse_test
           DB_PASSWORD: test_password
           DB_DATABASE: mindlapse_test
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
           NODE_ENV: test
+          APP_KEY: test-app-key-32-characters-long!
+          JWT_SECRET: test-jwt-secret-32-characters!!
 
       - name: Run all tests
         run: pnpm test
