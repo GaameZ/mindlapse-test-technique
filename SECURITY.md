@@ -228,15 +228,58 @@ const suppliers = await db
 
 ---
 
+## Protection contre l'Injection de Prompt (LLM)
+
+**Protection** : ✅ Sanitisation des inputs avant envoi au LLM
+
+### Vecteurs d'attaque bloqués
+
+Tous les inputs utilisateur (name, domain, notes, category) sont sanitisés avant envoi au LLM :
+
+- Suppression des blocs de code markdown (injection de code)
+- Suppression des accolades (injection JSON)
+- Suppression des patterns d'override d'instructions ("ignore previous instructions")
+- Suppression des tentatives de leak du prompt ("show the instructions")
+- Limitation de longueur à 1000 caractères (attaque par exhaustion de tokens)
+
+### Implémentation
+
+````typescript
+function sanitizeInput(input: string): string {
+  return input
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/[{}]/g, '')
+    .replace(/(ignore|disregard|forget|override)\s+(previous|all|above)/gi, '')
+    .replace(/(repeat|show|display)\s+(the\s+)?(instructions|prompt)/gi, '')
+    .slice(0, 1000)
+}
+````
+
+---
+
+## Rate Limiting IA
+
+**Protection** :
+
+Le pipeline IA est protégé contre les abus :
+
+- Rate limiting sur l'ajout de jobs dans la queue BullMQ
+- Retry avec backoff exponentiel en cas d'échec
+- Dead Letter Queue pour les jobs en échec permanent
+
+---
+
 ## Résumé
 
-| Aspect            | Status | Détail                                  |
-| ----------------- | ------ | --------------------------------------- |
-| **CSRF**          | ✅     | JWT en header                           |
-| **XSS**           | ✅     | Regex `/^[a-zA-Z0-9\s\.,;:!?\-()'"]*$/` |
-| **Rate Limiting** | ✅     | 3/15min register, 5/5min login          |
-| **Secrets**       | ✅     | Validation boot, .env.gitignore         |
-| **Headers**       | ✅     | Helmet (7 headers)                      |
-| **Multi-tenant**  | ✅     | Scoping + 5 tests                       |
-| **Audit trail**   | ✅     | Append-only + FK RESTRICT               |
-| **npm audit**     | ⚠️     | Manuel (CI TODO)                        |
+| Aspect                  | Status | Détail                                  |
+| ----------------------- | ------ | --------------------------------------- |
+| **CSRF**                | ✅     | JWT en header                           |
+| **XSS**                 | ✅     | Regex `/^[a-zA-Z0-9\s\.,;:!?\-()'"]*$/` |
+| **Rate Limiting Auth**  | ✅     | 3/15min register, 5/5min login          |
+| **Rate Limiting IA**    | ✅     |                                         |
+| **Injection de Prompt** | ✅     | Sanitisation multi-vecteurs             |
+| **Secrets**             | ✅     | Validation boot, .env.gitignore         |
+| **Headers**             | ✅     | Helmet (7 headers)                      |
+| **Multi-tenant**        | ✅     | Scoping + 5 tests                       |
+| **Audit trail**         | ✅     | Append-only + FK RESTRICT               |
+| **npm audit**           | ⚠️     | Manuel (CI TODO)                        |
