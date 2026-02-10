@@ -180,7 +180,7 @@ export function SupplierDetail({ supplierId }: SupplierDetailProps) {
               <CardTitle>AI Risk Analysis</CardTitle>
               <CardDescription>Automated risk assessment powered by AI</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="flex flex-col gap-4">
               <div>
                 <label className="text-sm font-medium text-muted-foreground">AI Risk Score</label>
                 <p className="text-2xl font-bold">

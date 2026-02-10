@@ -190,7 +190,7 @@ export function SuppliersTable() {
   )
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       <SuppliersFilters
         search={searchInput}
         category={searchParams.category as SupplierCategory | undefined}

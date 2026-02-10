@@ -15,11 +15,12 @@ import {
 } from '@/components/ui/select'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { FormError } from '@/components/ui/form-error'
 import { useUser } from '@/hooks/queries/use-users'
 import { useUpdateUser } from '@/hooks/mutations/use-users'
 import { ROLES, ROLE_LABELS, ROLE_DESCRIPTIONS } from '@/lib/user-roles'
 import { Role } from '@mindlapse/shared'
-import { FormError } from '../ui/form-error'
 import { useAuth } from '@/contexts/AuthContext'
 
 const updateUserSchema = z.object({
@@ -120,8 +121,11 @@ export function UserDetail() {
       </div>
 
       <div className="flex flex-col gap-4">
-        <div className="border rounded-lg p-6 bg-card">
-          <div className="flex flex-col gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>User Information</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
             <div>
               <Label className="text-muted-foreground">Email</Label>
               <p className="text-lg">{user.email}</p>
@@ -137,63 +141,72 @@ export function UserDetail() {
               <Label className="text-muted-foreground">Created</Label>
               <p>{new Date(user.createdAt).toLocaleString()}</p>
             </div>
-          </div>
-        </div>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="border rounded-lg p-6 bg-card flex flex-col gap-4"
-        >
-          <h2 className="text-xl font-semibold">Update Information</h2>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="fullName">Full Name</Label>
-            <Input
-              id="fullName"
-              {...register('fullName')}
-              aria-invalid={!!errors.fullName}
-              aria-describedby={errors.fullName ? 'fullName-error' : undefined}
-            />
-            {errors.fullName && <FormError id="fullName-error" message={errors.fullName.message} />}
-          </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <CardHeader>
+              <CardTitle>Update Information</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  {...register('fullName')}
+                  aria-invalid={!!errors.fullName}
+                  aria-describedby={errors.fullName ? 'fullName-error' : undefined}
+                />
+                {errors.fullName && (
+                  <FormError id="fullName-error" message={errors.fullName.message} />
+                )}
+              </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="role">Role</Label>
-            <Select
-              disabled={userId === authUser?.id}
-              value={selectedRole}
-              onValueChange={(value) => setValue('role', value as Role)}
-            >
-              <SelectTrigger id="role">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ROLES.map((role) => (
-                  <SelectItem key={role} value={role}>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{ROLE_LABELS[role]}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {ROLE_DESCRIPTIONS[role]}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.role && <FormError id="role-error" message={errors.role.message} />}
-          </div>
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => (window.location.href = '/users')}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isPending} className="flex flex-row gap-2 items-center">
-              <Save />
-              {isPending ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
-        </form>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="role">Role</Label>
+                <Select
+                  disabled={userId === authUser?.id}
+                  value={selectedRole}
+                  onValueChange={(value) => setValue('role', value as Role)}
+                >
+                  <SelectTrigger id="role">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLES.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{ROLE_LABELS[role]}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {ROLE_DESCRIPTIONS[role]}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.role && <FormError id="role-error" message={errors.role.message} />}
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => (window.location.href = '/users')}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="flex flex-row gap-2 items-center"
+                >
+                  <Save />
+                  {isPending ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            </CardContent>
+          </form>
+        </Card>
       </div>
     </div>
   )

@@ -41,11 +41,11 @@ export function SupplierAuditLogs({ supplierId }: SupplierAuditLogsProps) {
         ) : !data || data.data.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">No audit logs yet</p>
         ) : (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             {data.data.map((log) => (
               <div
                 key={log.id}
-                className="border-l-2 border-muted pl-4 py-2 space-y-2 hover:border-primary transition-colors"
+                className="border-l-2 border-muted pl-4 py-2 flex flex-col gap-2 hover:border-primary transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <Badge variant={actionVariants[log.action]}>{log.action}</Badge>
@@ -59,7 +59,7 @@ export function SupplierAuditLogs({ supplierId }: SupplierAuditLogsProps) {
                     <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
                       View changes
                     </summary>
-                    <div className="mt-2 space-y-1">
+                    <div className="mt-2 flex flex-col gap-1">
                       {Object.entries(log.after as Record<string, any>).map(([key, value]) => {
                         const beforeValue = (log.before as Record<string, any>)?.[key]
                         if (beforeValue === value) return null

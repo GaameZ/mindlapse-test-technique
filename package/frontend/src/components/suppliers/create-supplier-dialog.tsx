@@ -35,20 +35,7 @@ import {
   RISK_LEVEL_LABELS,
   STATUS_LABELS,
 } from '@/lib/supplier-enums'
-
-interface FormErrorProps {
-  id?: string
-  message?: string
-}
-
-function FormError({ id, message }: FormErrorProps) {
-  if (!message) return null
-  return (
-    <p id={id} className="text-sm text-destructive" role="alert">
-      {message}
-    </p>
-  )
-}
+import { FormError } from '@/components/ui/form-error'
 
 export function CreateSupplierDialog() {
   const [open, setOpen] = useState(false)
@@ -98,7 +85,7 @@ export function CreateSupplierDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus />
           Add Supplier
         </Button>
       </DialogTrigger>
@@ -110,8 +97,8 @@ export function CreateSupplierDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
-          <div className="space-y-2">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
             <label htmlFor="name" className="text-sm font-medium">
               Supplier Name <span className="text-destructive">*</span>
             </label>
@@ -126,7 +113,7 @@ export function CreateSupplierDialog() {
             />
             <FormError id="name-error" message={errors.name?.message} />
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <label htmlFor="domain" className="text-sm font-medium">
               Domain <span className="text-destructive">*</span>
             </label>
@@ -141,7 +128,7 @@ export function CreateSupplierDialog() {
             />
             <FormError id="domain-error" message={errors.domain?.message} />
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <label htmlFor="category" className="text-sm font-medium">
               Category <span className="text-destructive">*</span>
             </label>
@@ -169,7 +156,7 @@ export function CreateSupplierDialog() {
             </Select>
             <FormError id="category-error" message={errors.category?.message} />
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <label htmlFor="riskLevel" className="text-sm font-medium">
               Risk Level <span className="text-destructive">*</span>
             </label>
@@ -197,7 +184,7 @@ export function CreateSupplierDialog() {
             </Select>
             <FormError id="riskLevel-error" message={errors.riskLevel?.message} />
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <label htmlFor="status" className="text-sm font-medium">
               Status <span className="text-destructive">*</span>
             </label>
@@ -225,7 +212,7 @@ export function CreateSupplierDialog() {
             </Select>
             <FormError id="status-error" message={errors.status?.message} />
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <label htmlFor="contractEndDate" className="text-sm font-medium">
               Contract End Date
             </label>
@@ -238,7 +225,7 @@ export function CreateSupplierDialog() {
             />
             <FormError id="contractEndDate-error" message={errors.contractEndDate?.message} />
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <label htmlFor="notes" className="text-sm font-medium">
               Notes
             </label>

@@ -28,6 +28,7 @@ import {
   NOTES_REGEX,
   NOTES_MAX_LENGTH,
 } from '@mindlapse/shared'
+import { FormError } from '@/components/ui/form-error'
 import {
   SUPPLIER_CATEGORIES,
   RISK_LEVELS,
@@ -208,7 +209,7 @@ export function EditableField({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <label className="text-sm font-medium">{label}</label>
         {!isEditing && canEdit && (
@@ -221,12 +222,12 @@ export function EditableField({
       {!isEditing ? (
         <div className="text-base">{getDisplayValue()}</div>
       ) : (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
           {type === 'text' && (
             <>
               <Input {...register(field)} placeholder={`Enter ${label.toLowerCase()}`} />
               {errors[field] && (
-                <p className="text-sm text-destructive">{errors[field]?.message as string}</p>
+                <FormError id={`${field}-error`} message={errors[field]?.message} />
               )}
             </>
           )}
@@ -239,7 +240,7 @@ export function EditableField({
                 placeholder={`Enter ${label.toLowerCase()}`}
               />
               {errors[field] && (
-                <p className="text-sm text-destructive">{errors[field]?.message as string}</p>
+                <FormError id={`${field}-error`} message={errors[field]?.message} />
               )}
             </>
           )}
@@ -248,7 +249,7 @@ export function EditableField({
             <>
               <Input {...register(field)} type="date" />
               {errors[field] && (
-                <p className="text-sm text-destructive">{errors[field]?.message as string}</p>
+                <FormError id={`${field}-error`} message={errors[field]?.message} />
               )}
             </>
           )}
@@ -268,7 +269,7 @@ export function EditableField({
                 </SelectContent>
               </Select>
               {errors[field] && (
-                <p className="text-sm text-destructive">{errors[field]?.message as string}</p>
+                <FormError id={`${field}-error`} message={errors[field]?.message} />
               )}
             </>
           )}

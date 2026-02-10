@@ -60,7 +60,7 @@ export function DataTable<TData, TValue>({
   })
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="flex flex-col gap-4 w-full">
       <div className="rounded-md border overflow-x-auto max-w-full">
         <Table className="min-w-200">
           <TableHeader>
