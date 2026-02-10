@@ -1,4 +1,12 @@
-import type { User, Supplier, AuditLog, Tokens, PaginationMeta, ApiError } from '@mindlapse/shared'
+import type {
+  User,
+  Supplier,
+  AuditLog,
+  Tokens,
+  PaginationMeta,
+  ApiError,
+  Role,
+} from '@mindlapse/shared'
 
 export type { Tokens, PaginationMeta, ApiError }
 
@@ -29,21 +37,26 @@ export interface MeResponse {
   }
 }
 
-export interface RegisterRequest {
+export interface CreateUserRequest {
   email: string
   password: string
   fullName: string
-  organizationName?: string
-  organizationId?: string
+  role: Role
 }
 
-export interface RegisterResponse {
-  data: {
-    tokens: Tokens
-  }
+export interface UpdateUserRequest {
+  fullName?: string
+  role?: Role
 }
 
-// --- Suppliers Requests/Responses ---
+export interface UserResponse {
+  data: User
+}
+
+export interface UsersListResponse {
+  data: User[]
+  meta: PaginationMeta
+}
 
 export interface CreateSupplierRequest {
   name: string
@@ -74,14 +87,10 @@ export interface SuppliersListResponse {
   meta: PaginationMeta
 }
 
-// --- Audit Logs Responses ---
-
 export interface AuditLogsResponse {
   data: AuditLog[]
   meta: PaginationMeta
 }
-
-// --- Pagination ---
 
 export interface PaginationParams {
   page?: number

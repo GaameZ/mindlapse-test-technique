@@ -1,16 +1,16 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
-import { registerThrottle, loginThrottle } from '#start/limiter'
+import { loginThrottle } from '#start/limiter'
 
 const AuthController = () => import('#controllers/auth_controller')
 const SuppliersController = () => import('#controllers/suppliers_controller')
 const UsersController = () => import('#controllers/users_controller')
+const OrganizationsController = () => import('#controllers/organizations_controller')
 
 router
   .group(() => {
     router
       .group(() => {
-        router.post('/register', [AuthController, 'register']).use(registerThrottle)
         router.post('/login', [AuthController, 'login']).use(loginThrottle)
         router.post('/refresh', [AuthController, 'refresh'])
       })
@@ -75,5 +75,14 @@ router
       .prefix('/users')
       .use(middleware.jwtAuth())
       .use(middleware.rbac({ permission: 'user:manage' }))
+
+    router
+      .group(() => {
+        router
+          .delete('/current', [OrganizationsController, 'destroyCurrent'])
+          .use(middleware.rbac({ permission: 'org:delete' }))
+      })
+      .prefix('/organizations')
+      .use(middleware.jwtAuth())
   })
   .prefix('/api/v1')

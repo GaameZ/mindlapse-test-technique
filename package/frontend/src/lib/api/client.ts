@@ -5,13 +5,15 @@ import type {
   RefreshRequest,
   RefreshResponse,
   MeResponse,
-  RegisterRequest,
-  RegisterResponse,
   SupplierResponse,
   SuppliersListResponse,
   CreateSupplierRequest,
   UpdateSupplierRequest,
   AuditLogsResponse,
+  CreateUserRequest,
+  UpdateUserRequest,
+  UserResponse,
+  UsersListResponse,
   ApiError,
 } from './types'
 
@@ -31,7 +33,7 @@ class ApiClient {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      'X-Requested-With': 'XMLHttpRequest', // Protection CSRF basique
+      'X-Requested-With': 'XMLHttpRequest',
       ...(options.headers as Record<string, string>),
     }
 
@@ -61,13 +63,6 @@ class ApiClient {
 
   async login(data: LoginRequest): Promise<LoginResponse> {
     return this.request<LoginResponse>('/api/v1/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    })
-  }
-
-  async register(data: RegisterRequest): Promise<RegisterResponse> {
-    return this.request<RegisterResponse>('/api/v1/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
     })
@@ -133,6 +128,41 @@ class ApiClient {
   ): Promise<AuditLogsResponse> {
     const query = params ? `?${params.toString()}` : ''
     return this.request<AuditLogsResponse>(`/api/v1/suppliers/${supplierId}/audit-logs${query}`)
+  }
+
+  async getUsers(params?: URLSearchParams): Promise<UsersListResponse> {
+    const query = params ? `?${params.toString()}` : ''
+    return this.request<UsersListResponse>(`/api/v1/users${query}`)
+  }
+
+  async getUser(id: string): Promise<UserResponse> {
+    return this.request<UserResponse>(`/api/v1/users/${id}`)
+  }
+
+  async createUser(data: CreateUserRequest): Promise<UserResponse> {
+    return this.request<UserResponse>('/api/v1/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async updateUser(id: string, data: UpdateUserRequest): Promise<UserResponse> {
+    return this.request<UserResponse>(`/api/v1/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    return this.request<void>(`/api/v1/users/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
+  async deleteCurrentOrganization(): Promise<{ message: string }> {
+    return this.request<{ message: string }>('/api/v1/organizations/current', {
+      method: 'DELETE',
+    })
   }
 }
 

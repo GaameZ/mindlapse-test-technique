@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Command, LifeBuoy, Send, Warehouse } from 'lucide-react'
+import { Command, Warehouse, Users } from 'lucide-react'
 
 import { NavMain, type INavItem } from '@/components/layout/nav-main'
 import { NavSecondary } from '@/components/layout/nav-secondary'
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/sidebar'
 import { Link } from '@tanstack/react-router'
 import { useAuth } from '@/contexts/AuthContext'
+import { usePermissions } from '@/hooks/use-permissions'
 
 const navMainItems: INavItem[] = [
   {
@@ -26,25 +27,30 @@ const navMainItems: INavItem[] = [
   },
 ]
 
-const navSecondaryItems: INavItem[] = [
-  {
-    title: 'Support',
-    url: '/',
-    icon: LifeBuoy,
-  },
-  {
-    title: 'Feedback',
-    url: '/',
-    icon: Send,
-  },
-]
+function getNavSecondaryItems(canManageUsers: boolean): INavItem[] {
+  const items: INavItem[] = []
+
+  if (canManageUsers) {
+    items.push({
+      title: 'Users',
+      url: '/users',
+      icon: Users,
+    })
+  }
+
+  return items
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user: authUser } = useAuth()
+  const { can } = usePermissions()
+
   const user = {
     name: authUser?.fullName || '',
     email: authUser?.email || '',
   }
+
+  const navSecondaryItems = getNavSecondaryItems(can('user:manage'))
 
   return (
     <Sidebar variant="inset" {...props}>
