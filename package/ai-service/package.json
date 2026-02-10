@@ -2,5 +2,27 @@
   "name": "@mindlapse/ai-service",
   "version": "1.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/worker.ts",
+    "build": "tsc",
+    "start": "node dist/worker.js"
+  },
+  "dependencies": {
+    "@mindlapse/shared": "workspace:*",
+    "bullmq": "^5.30.7",
+    "ioredis": "^5.4.2",
+    "kysely": "^0.28.1",
+    "pg": "^8.14.0",
+    "validator": "^13.15.26",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/pg": "^8.11.10",
+    "@types/validator": "^13.15.10",
+    "dotenv": "^17.2.4",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.3"
+  }
 }

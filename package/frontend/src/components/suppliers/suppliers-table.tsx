@@ -12,6 +12,7 @@ import {
   type RiskLevel,
   type SupplierStatus,
   type SupplierCategory,
+  AiAnalysisStatus,
   DEFAULT_PAGE_SIZE,
 } from '@mindlapse/shared'
 import { formatDate } from '@/lib/utils'
@@ -163,9 +164,18 @@ export function SuppliersTable() {
         header: 'AI Score',
         cell: ({ row }) => {
           const score = row.getValue('aiRiskScore') as number | null
+          const status = row.original.aiAnalysisStatus
+
           if (score === null || score === undefined) {
-            return <span className="text-muted-foreground">Pending</span>
+            const isError = status === AiAnalysisStatus.ERROR
+            return (
+              <Badge variant={isError ? 'destructive' : 'outline'} className="font-mono">
+                {isError ? 'Error' : 'Pending'}
+              </Badge>
+            )
           }
+
+          // Afficher le score si disponible
           return <span className="font-mono">{score.toFixed(0)}/100</span>
         },
       },

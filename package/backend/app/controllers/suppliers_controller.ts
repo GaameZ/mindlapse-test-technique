@@ -13,6 +13,7 @@ import {
   updateNotesValidator,
 } from '#validators/supplier_validator'
 import { listAuditLogsValidator } from '#validators/audit_log_validator'
+import { aiQueueService } from '#services/ai_queue_service'
 
 export default class SuppliersController {
   /**
@@ -124,6 +125,17 @@ export default class SuppliersController {
       })
       .returningAll()
       .executeTakeFirstOrThrow()
+
+    await aiQueueService.enqueueRiskAnalysis({
+      supplierId: supplier.id,
+      supplierName: supplier.name,
+      domain: supplier.domain,
+      category: supplier.category,
+      status: supplier.status,
+      contractEndDate: supplier.contract_end_date?.toISOString() ?? null,
+      notes: supplier.notes,
+      organizationId: user.organizationId,
+    })
 
     ctx.supplierId = supplier.id
 

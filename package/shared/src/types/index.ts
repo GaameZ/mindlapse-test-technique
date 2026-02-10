@@ -31,6 +31,12 @@ export enum AuditAction {
   DELETE = 'DELETE',
 }
 
+export enum AiAnalysisStatus {
+  PENDING = 'pending',
+  COMPLETE = 'complete',
+  ERROR = 'error',
+}
+
 export interface Organization {
   id: string
   name: string
@@ -59,9 +65,31 @@ export interface Supplier {
   notes: string | null
   organizationId: string
   aiRiskScore: number | null
-  aiAnalysis: Record<string, unknown> | null
+  aiAnalysis: AiAnalysisResult | null
+  aiAnalysisStatus: AiAnalysisStatus
   createdAt: string
   updatedAt: string
+}
+
+export interface AiAnalysisResult {
+  riskScore: number
+  analysis: string
+  keyRisks: string[]
+  recommendations: string[]
+  confidence: number
+  generatedAt: string
+  model?: string
+}
+
+export interface AiAnalysisJobData {
+  supplierId: string
+  supplierName: string
+  domain: string
+  category: SupplierCategory
+  status: SupplierStatus
+  contractEndDate: string | null
+  notes: string | null
+  organizationId: string
 }
 
 export interface AuditLog {

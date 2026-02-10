@@ -19,6 +19,9 @@ export default await Env.create(new URL(monorepoRoot + '/', import.meta.url), {
   DB_PASSWORD: Env.schema.string.optional(),
   DB_DATABASE: Env.schema.string(),
 
+  REDIS_HOST: Env.schema.string({ format: 'host' }),
+  REDIS_PORT: Env.schema.number(),
+
   JWT_SECRET: Env.schema.string(),
   LIMITER_STORE: Env.schema.enum(['memory'] as const),
 })
