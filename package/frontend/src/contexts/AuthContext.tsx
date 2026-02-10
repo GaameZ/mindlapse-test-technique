@@ -28,13 +28,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await apiClient.me()
       setUser(response.data.user)
+      setIsLoading(false)
     } catch (err) {
       if (import.meta.env.DEV) {
         console.error('Failed to fetch current user:', err)
       }
       await tryRefreshToken()
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -43,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!refreshToken) {
       authStorage.clearTokens()
       setUser(null)
+      setIsLoading(false)
       return
     }
 
@@ -51,13 +51,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const tokens = response.data.tokens
       authStorage.setTokens(tokens.accessToken, tokens.refreshToken)
 
-      await fetchCurrentUser()
+      const userResponse = await apiClient.me()
+      setUser(userResponse.data.user)
+      setIsLoading(false)
     } catch (err) {
       if (import.meta.env.DEV) {
         console.error('Token refresh failed:', err)
       }
       authStorage.clearTokens()
       setUser(null)
+      setIsLoading(false)
     }
   }
 
