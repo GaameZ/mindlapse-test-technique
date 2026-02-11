@@ -24,4 +24,6 @@ export default await Env.create(new URL(monorepoRoot + '/', import.meta.url), {
 
   JWT_SECRET: Env.schema.string(),
   LIMITER_STORE: Env.schema.enum(['memory'] as const),
+
+  CORS_ALLOWED_ORIGINS: Env.schema.string.optional(),
 })
