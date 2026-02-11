@@ -69,10 +69,10 @@ export function SupplierAuditLogs({ supplierId }: SupplierAuditLogsProps) {
                             <span className="font-medium">{key}:</span>{' '}
                             {beforeValue !== undefined && (
                               <span className="line-through text-destructive">
-                                {String(beforeValue)}
+                                {JSON.stringify(beforeValue)}
                               </span>
                             )}{' '}
-                            <span className="text-green-600">{String(value)}</span>
+                            <span className="text-green-600">{JSON.stringify(value)}</span>
                           </div>
                         )
                       })}

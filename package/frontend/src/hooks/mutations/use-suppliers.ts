@@ -13,6 +13,9 @@ export function useCreateSupplier() {
       toast.success('Supplier created', {
         description: 'The supplier has been successfully added',
       })
+      toast.success('AI Analysis', {
+        description: 'The AI analysis has been successfully started',
+      })
     },
     onError: (error) => {
       toast.error('Failed to create supplier', {

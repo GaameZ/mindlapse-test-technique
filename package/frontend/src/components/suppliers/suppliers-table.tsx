@@ -175,7 +175,6 @@ export function SuppliersTable() {
             )
           }
 
-          // Afficher le score si disponible
           return <span className="font-mono">{score.toFixed(0)}/100</span>
         },
       },
