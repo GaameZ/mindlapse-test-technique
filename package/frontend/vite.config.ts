@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [
     tanstackRouter({
       target: 'react',
-      autoCodeSplitting: false,
+      autoCodeSplitting: true,
     }),
     tailwindcss(),
     react(),
@@ -34,11 +34,16 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     minify: 'esbuild',
     sourcemap: false,
+    target: 'es2020',
+    cssCodeSplit: true,
   },
 
   server: {
     warmup: {
       clientFiles: ['./src/main.tsx', './src/routes/**/*.tsx'],
     },
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', '@tanstack/react-router', '@tanstack/react-query'],
   },
 })
