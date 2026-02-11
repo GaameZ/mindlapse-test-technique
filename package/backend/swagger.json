@@ -22,94 +22,22 @@
   "tags": [
     {
       "name": "Authentication",
-      "description": "Endpoints d'authentification (register, login, refresh)"
+      "description": "Endpoints d'authentification (login, refresh, me)"
     },
     {
       "name": "Suppliers",
-      "description": "Gestion des fournisseurs (CRUD + audit logs)"
+      "description": "Gestion des fournisseurs (CRUD + audit logs + risk management)"
     },
     {
       "name": "Users",
       "description": "Gestion des utilisateurs (RBAC: Owner only)"
+    },
+    {
+      "name": "Organizations",
+      "description": "Gestion des organisations (Owner only)"
     }
   ],
   "paths": {
-    "/auth/register": {
-      "post": {
-        "tags": ["Authentication"],
-        "summary": "Créer un compte utilisateur",
-        "description": "Crée une nouvelle organisation + user Owner, ou rejoint une organisation existante comme Analyst.",
-        "operationId": "register",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["email", "password", "fullName"],
-                "properties": {
-                  "email": {
-                    "type": "string",
-                    "format": "email",
-                    "example": "alice@example.com"
-                  },
-                  "password": {
-                    "type": "string",
-                    "minLength": 8,
-                    "example": "SecurePass123"
-                  },
-                  "fullName": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 255,
-                    "example": "Alice Dupont"
-                  },
-                  "organizationName": {
-                    "type": "string",
-                    "description": "Nom de la nouvelle organisation (crée une org + user Owner)",
-                    "example": "Acme Corp"
-                  },
-                  "organizationId": {
-                    "type": "string",
-                    "format": "uuid",
-                    "description": "UUID d'une organisation existante (rejoint comme Analyst)",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "User créé avec succès",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "tokens": {
-                          "$ref": "#/components/schemas/Tokens"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationError"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimitError"
-          }
-        }
-      }
-    },
     "/auth/login": {
       "post": {
         "tags": ["Authentication"],
@@ -560,6 +488,147 @@
         }
       }
     },
+    "/suppliers/{id}/risk-level": {
+      "patch": {
+        "tags": ["Suppliers"],
+        "summary": "Mettre à jour le niveau de risque",
+        "description": "Modifie uniquement le risk_level d'un fournisseur (permission: supplier:update_risk). Génère un audit log.",
+        "operationId": "updateSupplierRiskLevel",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["riskLevel"],
+                "properties": {
+                  "riskLevel": {
+                    "$ref": "#/components/schemas/RiskLevel"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Niveau de risque mis à jour",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Supplier"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
+    "/suppliers/{id}/notes": {
+      "patch": {
+        "tags": ["Suppliers"],
+        "summary": "Mettre à jour les notes",
+        "description": "Modifie uniquement les notes d'un fournisseur (permission: supplier:add_notes). Génère un audit log.",
+        "operationId": "updateSupplierNotes",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["notes"],
+                "properties": {
+                  "notes": {
+                    "type": "string",
+                    "maxLength": 10000,
+                    "nullable": true,
+                    "example": "Contrat renouvelé jusqu'en 2027."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notes mises à jour",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Supplier"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          }
+        }
+      }
+    },
     "/suppliers/{supplierId}/audit-logs": {
       "get": {
         "tags": ["Suppliers"],
@@ -895,6 +964,30 @@
           }
         }
       }
+    },
+    "/organizations/current": {
+      "delete": {
+        "tags": ["Organizations"],
+        "summary": "Supprimer l'organisation courante",
+        "description": "Supprime l'organisation de l'utilisateur connecté ainsi que toutes les données associées (users, suppliers, audit_logs). Permission: org:delete (Owner uniquement). ⚠️ Action irréversible.",
+        "operationId": "deleteCurrentOrganization",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Organisation supprimée avec succès"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1199,13 +1292,13 @@
       },
       "SupplierStatus": {
         "type": "string",
-        "enum": ["active", "inactive", "pending", "offboarded"],
+        "enum": ["active", "inactive", "under_review"],
         "example": "active"
       },
       "AuditAction": {
         "type": "string",
-        "enum": ["create", "update", "delete"],
-        "example": "update"
+        "enum": ["CREATE", "UPDATE", "DELETE"],
+        "example": "UPDATE"
       },
       "PaginationMeta": {
         "type": "object",
