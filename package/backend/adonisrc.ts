@@ -19,26 +19,7 @@ export default defineConfig({
     () => import('@adonisjs/cors/cors_provider'),
     () => import('@adonisjs/limiter/limiter_provider'),
   ],
-
-  /*
-  |--------------------------------------------------------------------------
-  | Preloads
-  |--------------------------------------------------------------------------
-  |
-  | List of modules to import before starting the application.
-  |
-  */
   preloads: [() => import('#start/routes'), () => import('#start/kernel')],
-
-  /*
-  |--------------------------------------------------------------------------
-  | Tests
-  |--------------------------------------------------------------------------
-  |
-  | List of test suites to organize tests by their type. Feel free to remove
-  | and add additional suites.
-  |
-  */
   tests: {
     suites: [
       {

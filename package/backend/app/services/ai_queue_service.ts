@@ -33,12 +33,6 @@ class AiQueueService {
     })
   }
 
-  /**
-   * Enqueue a risk analysis job for a supplier
-   *
-   * @param data - Supplier data for risk analysis
-   * @returns Job ID
-   */
   async enqueueRiskAnalysis(data: AiAnalysisJobData): Promise<string> {
     const job = await this.queue.add('analyze-risk', data, {
       jobId: `risk-analysis-${data.supplierId}-${Date.now()}`,

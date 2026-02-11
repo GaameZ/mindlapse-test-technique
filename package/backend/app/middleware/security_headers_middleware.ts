@@ -27,7 +27,7 @@ export default class SecurityHeadersMiddleware {
       },
       // X-Frame-Options
       frameguard: {
-        action: 'deny', // Bloque complètement les iframes
+        action: 'deny',
       },
       // Referrer Policy
       referrerPolicy: {

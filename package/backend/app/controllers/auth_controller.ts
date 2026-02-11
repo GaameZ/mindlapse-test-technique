@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import AuthService from '#services/auth_service'
 import { loginValidator, refreshTokenValidator } from '#validators/auth_validator'
+import { getAuthUser } from '#middleware/jwt_auth_middleware'
 
 export default class AuthController {
   /**
@@ -57,7 +58,6 @@ export default class AuthController {
    * GET /api/v1/auth/me
    */
   async me(ctx: HttpContext): Promise<void> {
-    const { getAuthUser } = await import('#middleware/jwt_auth_middleware')
     const authUser = getAuthUser(ctx)
 
     const user = await AuthService.getUserById(authUser.userId)
